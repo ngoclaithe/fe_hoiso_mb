@@ -10,7 +10,7 @@ export default function ProfilePage() {
       try {
         const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
         if (!token) return;
-        const res = await fetch("/api/auth/profile", { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" });
+        const res = await fetch(token ? `/api/auth/profile?token=${encodeURIComponent(token)}` : "/api/auth/profile", { cache: "no-store" });
         if (!res.ok) return;
         const data = await res.json();
         setProfile(data);
