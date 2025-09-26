@@ -50,7 +50,7 @@ export default function AdminLoansPage() {
       {error && <p className="text-red-600">{error}</p>}
       <div className="space-y-3">
         {loans.map((l) => (
-          <div key={l.id} className="p-3 bg-white border rounded-lg">
+          <div key={l.id} className="p-3 bg-blue-50 border rounded-lg">
             <div className="flex justify-between items-center">
               <div>
                 <div className="text-sm text-gray-600">Người vay</div>
@@ -68,7 +68,7 @@ export default function AdminLoansPage() {
               </div>
               <div>
                 <div className="text-sm text-gray-600">Trạng thái</div>
-                <div className="font-medium">{l.status}</div>
+                <div className="font-medium">{loanStatusLabel(l.status)}</div>
               </div>
             </div>
             <div className="mt-3 flex gap-2">
