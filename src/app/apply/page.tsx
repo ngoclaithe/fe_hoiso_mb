@@ -179,7 +179,7 @@ export default function ApplyPage() {
         citizenIdFrontUrl,
         citizenIdBackUrl,
         portraitUrl,
-        gender: f.gender,
+        gender: String(f.gender).toLowerCase(),
         dateOfBirth: f.dateOfBirth,
         occupation: f.occupation,
         income: Number(f.income),
