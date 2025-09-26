@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { loanStatusLabel } from "@/lib/loan";
 
 export default function AdminLoansPage() {
   const [loading, setLoading] = useState(true);
