@@ -162,7 +162,7 @@ export default function ApplyPage() {
           body: JSON.stringify(options),
           cache: "no-store",
         });
-        if (!sigRes.ok) throw new Error("Không l��y được chữ ký Cloudinary");
+        if (!sigRes.ok) throw new Error("Không lấy được chữ ký Cloudinary");
         const sig: Signature = await sigRes.json();
 
         if (images.front) citizenIdFrontUrl = await uploadToCloudinary(images.front, sig, "image");
@@ -408,7 +408,7 @@ export default function ApplyPage() {
               <option value={30000000}>Trên 25 triệu</option>
             </select>
           </label>
-          <label className="block text_sm">Mục đích khoản vay
+          <label className="block text-sm">Mục đích khoản vay
             <input className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={f.loanPurpose} onChange={(e)=>set("loanPurpose", e.target.value)} />
           </label>
           <label className="block text-sm">Số điện thoại người thân 1
