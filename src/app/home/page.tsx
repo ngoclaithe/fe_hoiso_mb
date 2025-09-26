@@ -130,8 +130,8 @@ export default function Home() {
         </div>
       </section>
 
-      <div className="mb-4">
-        <Link href="/apply" className="block w-full text-center bg-blue-600 text-white py-3 rounded-lg font-medium">Đăng ký khoản vay</Link>
+      <div className="mb-4 flex justify-center">
+        <Link href="/apply" className="w-60 text-center bg-blue-600 text-white py-3 rounded-lg font-medium">Đăng ký khoản vay</Link>
       </div>
 
       <ul className="text-sm space-y-1 mb-4">
