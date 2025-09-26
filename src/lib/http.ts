@@ -13,6 +13,14 @@ export function apiUrl(path: string): string {
   return `${backendBase()}${API_PREFIX}${p}`;
 }
 
+// Public (client-side) builder for full backend URL
+export function publicApiUrl(path: string): string {
+  const base = (process.env.NEXT_PUBLIC_URL_BACKEND || "").replace(/\/$/, "");
+  if (!base) throw new Error("Thiếu NEXT_PUBLIC_URL_BACKEND");
+  const p = path.startsWith("/") ? path : `/${path}`;
+  return `${base}${API_PREFIX}${p}`;
+}
+
 export async function forwardRaw(
   req: NextRequest,
   path: string,

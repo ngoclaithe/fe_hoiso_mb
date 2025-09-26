@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { publicApiUrl } from "@/lib/http";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -12,8 +13,15 @@ export default function LoginPage() {
 
   useEffect(() => {
     (async () => {
-      const r = await fetch("/api/auth/profile", { cache: "no-store" });
-      if (r.ok) router.replace("/home");
+      try {
+        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+        if (!token) return;
+        const r = await fetch(publicApiUrl("/auth/profile"), {
+          cache: "no-store",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (r.ok) router.replace("/home");
+      } catch {}
     })();
   }, [router]);
 
@@ -22,12 +30,16 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/login", {
+      const res = await fetch(publicApiUrl("/auth/login"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
       if (!res.ok) throw new Error("Đăng nhập thất bại");
+      const data = await res.json().catch(() => null);
+      if (data?.access_token) {
+        try { localStorage.setItem("token", data.access_token); } catch {}
+      }
       router.replace("/home");
     } catch (e: any) {
       setError(e?.message || "Lỗi không xác định");

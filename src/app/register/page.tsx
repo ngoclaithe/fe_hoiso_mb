@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { publicApiUrl } from "@/lib/http";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -15,8 +16,15 @@ export default function RegisterPage() {
 
   useEffect(() => {
     (async () => {
-      const r = await fetch("/api/auth/profile", { cache: "no-store" });
-      if (r.ok) router.replace("/home");
+      try {
+        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+        if (!token) return;
+        const r = await fetch(publicApiUrl("/auth/profile"), {
+          cache: "no-store",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (r.ok) router.replace("/home");
+      } catch {}
     })();
   }, [router]);
 
@@ -29,14 +37,14 @@ export default function RegisterPage() {
     }
     setLoading(true);
     try {
-      const r = await fetch("/api/auth/register", {
+      const r = await fetch(publicApiUrl("/auth/register"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, phone, password, confirmPassword: confirm }),
+        body: JSON.stringify({ username, password, email, phone }),
+        credentials: "include",
       });
       if (!r.ok) throw new Error("Đăng ký thất bại");
-      await fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username, password }) });
-      router.replace("/home");
+      router.replace("/login");
     } catch (e: any) {
       setError(e?.message || "Lỗi không xác định");
     } finally { setLoading(false); }
