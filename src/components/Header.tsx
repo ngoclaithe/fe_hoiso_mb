@@ -28,7 +28,7 @@ export default function Header() {
           <div className="text-lg font-semibold">Hệ thống vay vốn</div>
         </div>
         <div className="flex items-center gap-3">
-          {profile ? (
+          {profile && (
             <>
               <Link href="/notifications" className="p-2 rounded-md hover:bg-gray-100" aria-label="Thông báo">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -45,11 +45,6 @@ export default function Header() {
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-pink-500 text-white flex items-center justify-center font-medium">{initials}</div>
                 </Link>
               </div>
-            </>
-          ) : (
-            <>
-              <Link href="/login" className="px-3 py-1 rounded-md border">Đăng nhập</Link>
-              <Link href="/register" className="px-3 py-1 rounded-md bg-blue-600 text-white">Đăng ký</Link>
             </>
           )}
         </div>
