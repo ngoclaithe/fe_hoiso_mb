@@ -35,7 +35,7 @@ export default function Home() {
       try {
         const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
         if (!token) { router.replace("/"); return; }
-        const r = await fetch(publicApiUrl("/auth/profile"), {
+        const r = await fetch("/api/auth/profile", {
           cache: "no-store",
           headers: { Authorization: `Bearer ${token}` },
         });
