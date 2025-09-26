@@ -164,9 +164,13 @@ export default function ApplyPage() {
 
   return (
     <div className="px-4 py-4">
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center gap-3 mb-3">
         <button onClick={prev} disabled={step===1} className="text-sm px-3 py-1 rounded-full border disabled:opacity-50">Trở lại</button>
-        <div className="text-sm">Bước {step} / 5</div>
+        <div className="flex-1">
+          <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
+            <div className="h-full bg-blue-600" style={{ width: `${((step - 1) / 4) * 100}%` }} />
+          </div>
+        </div>
       </div>
 
       {step === 1 && (
@@ -186,13 +190,22 @@ export default function ApplyPage() {
           </label>
 
           <div className="rounded-lg border p-3 text-sm space-y-1">
-            <div className="font-medium">Preview</div>
+            <div className="font-medium">Thông tin khoản vay</div>
             <div>Số tiền: {formatCurrencyVND(f.loanAmount)}</div>
             <div>Thời hạn vay: {f.loanTermMonths} tháng</div>
             <div>Ngày vay: {new Date().toLocaleDateString("vi-VN")}</div>
             <div>Hình thức thanh toán: Trả góp mỗi tháng</div>
-            <div>Trả nợ kỳ đầu: {formatCurrencyVND(firstInstallment)}</div>
-            <div>Lãi suất hàng tháng: {f.interestRate}%</div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="rounded-lg border p-3">
+              <div className="text-gray-600">Trả nợ kỳ đầu</div>
+              <div className="font-medium">{formatCurrencyVND(firstInstallment)}</div>
+            </div>
+            <div className="rounded-lg border p-3">
+              <div className="text-gray-600">Lãi suất hàng tháng</div>
+              <div className="font-medium">{f.interestRate}%</div>
+            </div>
           </div>
 
           <button onClick={()=>setStep(2)} className="w-full bg-blue-600 text-white py-3 rounded-lg">Xác nhận khoản vay</button>
