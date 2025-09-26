@@ -6,16 +6,37 @@ export default function Header() {
   const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
-    (async () => {
+    let mounted = true;
+    async function fetchProfile() {
       try {
         const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-        if (!token) return;
+        if (!token) {
+          if (mounted) setProfile(null);
+          return;
+        }
         const res = await fetch("/api/auth/profile", { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" });
-        if (!res.ok) return;
+        if (!res.ok) {
+          if (mounted) setProfile(null);
+          return;
+        }
         const data = await res.json();
-        setProfile(data);
-      } catch {}
-    })();
+        if (mounted) setProfile(data);
+      } catch (err) {
+        if (mounted) setProfile(null);
+      }
+    }
+
+    fetchProfile();
+
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'token') fetchProfile();
+    };
+    const onFocus = () => fetchProfile();
+
+    window.addEventListener('storage', onStorage);
+    window.addEventListener('focus', onFocus);
+
+    return () => { mounted = false; window.removeEventListener('storage', onStorage); window.removeEventListener('focus', onFocus); };
   }, []);
 
   const initials = profile?.username ? profile.username.slice(0,2).toUpperCase() : "U";
