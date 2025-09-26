@@ -16,13 +16,19 @@ export default function NotificationsPage() {
   return (
     <div className="p-4">
       <h1 className="text-lg font-semibold mb-3">Thông báo</h1>
-      {loading && <p>Đang tải...</p>}
-      {!loading && items.length === 0 && <p>Không có thông báo</p>}
-      <ul className="space-y-2">
-        {items.map((t, i) => (
-          <li key={i} className="p-3 border rounded-lg bg-white">{t}</li>
+      <div className="space-y-3">
+        {loading && <p>Đang tải...</p>}
+        {!loading && items.length === 0 && <p>Không có thông báo</p>}
+        {!loading && items.map((t, i) => (
+          <div key={i} className="p-3 bg-white rounded-lg shadow flex items-start gap-3">
+            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700">i</div>
+            <div>
+              <div className="text-sm text-gray-700">{t}</div>
+              <div className="text-xs text-gray-400 mt-1">Vừa mới</div>
+            </div>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }
