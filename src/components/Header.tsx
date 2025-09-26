@@ -10,12 +10,9 @@ export default function Header() {
     async function fetchProfile() {
       try {
         const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-        if (!token) {
-          if (mounted) setProfile(null);
-          return;
-        }
-        // Fetch profile via BFF; rely on cookie or forwarded Authorization header
-        const res = await fetch("/api/auth/profile", { cache: "no-store", headers: token ? { Authorization: `Bearer ${token}` } : undefined });
+        // Try with token if available, otherwise try cookie-based request
+        const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
+        const res = await fetch("/api/auth/profile", { cache: "no-store", headers });
         if (!res.ok) {
           if (mounted) setProfile(null);
           return;
@@ -33,11 +30,13 @@ export default function Header() {
       if (e.key === 'token') fetchProfile();
     };
     const onFocus = () => fetchProfile();
+    const onAuthChanged = () => fetchProfile();
 
     window.addEventListener('storage', onStorage);
     window.addEventListener('focus', onFocus);
+    window.addEventListener('auth:changed', onAuthChanged);
 
-    return () => { mounted = false; window.removeEventListener('storage', onStorage); window.removeEventListener('focus', onFocus); };
+    return () => { mounted = false; window.removeEventListener('storage', onStorage); window.removeEventListener('focus', onFocus); window.removeEventListener('auth:changed', onAuthChanged); };
   }, []);
 
   const initials = profile?.username ? profile.username.slice(0,2).toUpperCase() : "U";
