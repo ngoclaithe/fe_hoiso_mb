@@ -56,7 +56,7 @@ export default function RegisterPage() {
           <h1 className="text-2xl font-bold text-gray-900">Đăng ký</h1>
           <p className="text-sm text-gray-600">Tạo tài khoản mới</p>
         </div>
-        <form onSubmit={submit} className="space-y-3">
+        <form onSubmit={submit} className="space-y-2">
           <label className="block text-sm">Tên đăng nhập
             <input className="mt-1 w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500" value={username} onChange={(e)=>setUsername(e.target.value)} placeholder="username" autoComplete="username" />
           </label>
