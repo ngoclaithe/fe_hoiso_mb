@@ -41,7 +41,7 @@ export default function HistoryPage() {
 
       <div className="space-y-3">
         {loans.map((l) => (
-          <div key={l.id} className="p-4 bg-white border rounded-lg shadow-sm">
+          <div key={l.id} className="p-4 bg-blue-50 border rounded-lg shadow-sm">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm text-gray-500">Số tiền</div>
@@ -49,7 +49,7 @@ export default function HistoryPage() {
               </div>
               <div className="text-right">
                 <div className="text-sm text-gray-500">Trạng thái</div>
-                <div className={`font-semibold ${l.status === 'approved' ? 'text-green-600' : l.status === 'rejected' ? 'text-red-600' : 'text-yellow-600'}`}>{l.status}</div>
+                <div className={`font-semibold ${l.status === 'approved' ? 'text-green-600' : l.status === 'rejected' ? 'text-red-600' : l.status === 'pending' ? 'text-yellow-600' : 'text-gray-700'}`}>{loanStatusLabel(l.status)}</div>
               </div>
             </div>
             <div className="mt-3 flex items-center justify-between">
