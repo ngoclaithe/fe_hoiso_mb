@@ -3,7 +3,6 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { formatCurrencyVND } from "@/lib/loan";
 import { useRouter } from "next/navigation";
-import { publicApiUrl } from "@/lib/http";
 
 const firstSlides = [
   "https://www.anphabe.com/file-deliver.php?key=hcWDxaBjm7TXnZedhtmlrtKWiG3ZcGOgWtaWr1qhqG5mbluboZ1UoKNrZp1aa2dmZ2maVXHXamiXclaUx8vF1tDYwdrHnNaehp7VnZSgU1ehrg",
