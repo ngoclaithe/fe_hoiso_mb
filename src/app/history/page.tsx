@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 
 import { useRouter } from "next/navigation";
+import { loanStatusLabel } from "@/lib/loan";
 
 export default function HistoryPage() {
   const router = useRouter();
