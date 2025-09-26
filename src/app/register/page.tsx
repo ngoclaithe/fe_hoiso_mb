@@ -2,7 +2,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { publicApiUrl } from "@/lib/http";
 
 export default function RegisterPage() {
   const router = useRouter();
