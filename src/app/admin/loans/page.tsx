@@ -2,9 +2,31 @@
 import { useEffect, useState } from "react";
 import { loanStatusLabel } from "@/lib/loan";
 
+// Define interface for User object
+interface User {
+  username?: string;
+}
+
+// Define interface for Loan object
+interface Loan {
+  id: string;
+  fullName?: string;
+  user?: User;
+  loanAmount?: number | string;
+  loan_amount?: number | string;
+  loanTermMonths?: number;
+  loan_term_months?: number;
+  status: string;
+}
+
+// Define interface for API response
+interface LoansApiResponse {
+  data?: Loan[];
+}
+
 export default function AdminLoansPage() {
   const [loading, setLoading] = useState(true);
-  const [loans, setLoans] = useState<any[]>([]);
+  const [loans, setLoans] = useState<Loan[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   async function load() {
@@ -12,16 +34,22 @@ export default function AdminLoansPage() {
     setError(null);
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      const res = await fetch("/api/admin/loans", { headers: token ? { Authorization: `Bearer ${token}` } : undefined, cache: "no-store" });
+      const res = await fetch("/api/admin/loans", { 
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined, 
+        cache: "no-store" 
+      });
       if (!res.ok) {
         const t = await res.text().catch(() => "");
         throw new Error(t || `Server error ${res.status}`);
       }
-      const data = await res.json();
+      const data: Loan[] | LoansApiResponse = await res.json();
       setLoans(Array.isArray(data) ? data : data.data || []);
-    } catch (e: any) {
-      setError(e?.message || "Lỗi tải danh sách");
-    } finally { setLoading(false); }
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : "Lỗi tải danh sách";
+      setError(errorMessage);
+    } finally { 
+      setLoading(false); 
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -31,7 +59,10 @@ export default function AdminLoansPage() {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
       const res = await fetch(`/api/admin/loans?id=${encodeURIComponent(id)}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        headers: { 
+          "Content-Type": "application/json", 
+          ...(token ? { Authorization: `Bearer ${token}` } : {}) 
+        },
         body: JSON.stringify({ status }),
       });
       if (!res.ok) {
@@ -39,8 +70,9 @@ export default function AdminLoansPage() {
         throw new Error(t || `Error ${res.status}`);
       }
       await load();
-    } catch (e: any) {
-      alert(e?.message || "Không thể cập nhật");
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : "Không thể cập nhật";
+      alert(errorMessage);
     }
   }
 

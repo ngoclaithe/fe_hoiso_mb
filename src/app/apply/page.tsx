@@ -2,6 +2,7 @@
 import { useMemo, useState, useRef } from "react";
 import { calcMonthlyInstallment, formatCurrencyVND, Gender, VN_BANKS, todayISO } from "@/lib/loan";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 type LoanForm = {
   loanAmount: number;
@@ -42,6 +43,17 @@ type Signature = {
   tags?: string;
   transformation?: string;
 };
+
+// Define interface for error response
+interface ErrorResponse {
+  message?: string;
+}
+
+// Define interface for cloudinary response
+interface CloudinaryResponse {
+  secure_url?: string;
+  url?: string;
+}
 
 export default function ApplyPage() {
   const router = useRouter();
@@ -122,7 +134,7 @@ export default function ApplyPage() {
     ] as const;
 
     (signedParams as readonly string[]).forEach((k) => {
-      const v = (sig as any)[k];
+      const v = sig[k as keyof Signature];
       if (v !== undefined && v !== null) form.append(k, String(v));
     });
 
@@ -134,8 +146,8 @@ export default function ApplyPage() {
       const err = await res.text().catch(() => "");
       throw new Error(err || "Upload thất bại");
     }
-    const data = await res.json();
-    return data.secure_url || data.url;
+    const data: CloudinaryResponse = await res.json();
+    return data.secure_url || data.url || "";
   }
 
   function applySelectedFile(slot: DocSlot, file: File | undefined) {
@@ -210,14 +222,15 @@ export default function ApplyPage() {
       });
 
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error((err as any)?.message || "Tạo hồ sơ thất bại");
+        const err: ErrorResponse = await res.json().catch(() => ({}));
+        throw new Error(err?.message || "Tạo hồ sơ thất bại");
       }
 
       alert("Tạo hồ sơ thành công");
       router.replace("/");
-    } catch (e: any) {
-      alert(e?.message || "Có lỗi xảy ra");
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : "Có lỗi xảy ra";
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -349,13 +362,13 @@ export default function ApplyPage() {
 
           <div className="flex flex-col gap-4">
             <button type="button" onClick={()=>setPickerFor("front")} className="w-full h-48 rounded-lg overflow-hidden border bg-gray-100">
-              {preview.front ? <img src={preview.front} alt="front" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-500">Ảnh CCCD mặt trước</div>}
+              {preview.front ? <Image src={preview.front} alt="front" width={400} height={192} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-500">Ảnh CCCD mặt trước</div>}
             </button>
             <button type="button" onClick={()=>setPickerFor("back")} className="w-full h-48 rounded-lg overflow-hidden border bg-gray-100">
-              {preview.back ? <img src={preview.back} alt="back" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-500">Ảnh CCCD mặt sau</div>}
+              {preview.back ? <Image src={preview.back} alt="back" width={400} height={192} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-500">Ảnh CCCD mặt sau</div>}
             </button>
             <button type="button" onClick={()=>setPickerFor("portrait")} className="w-full h-48 rounded-lg overflow-hidden border bg-gray-100">
-              {preview.portrait ? <img src={preview.portrait} alt="portrait" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-500">Ảnh chân dung</div>}
+              {preview.portrait ? <Image src={preview.portrait} alt="portrait" width={400} height={192} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-500">Ảnh chân dung</div>}
             </button>
           </div>
 

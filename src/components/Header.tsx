@@ -3,8 +3,15 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
+// Define interface for user profile
+interface UserProfile {
+  username: string;
+  role: string;
+  email?: string;
+}
+
 export default function Header() {
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -18,9 +25,10 @@ export default function Header() {
           if (mounted) setProfile(null);
           return;
         }
-        const data = await res.json();
+        const data: UserProfile = await res.json();
         if (mounted) setProfile(data);
-      } catch (err) {
+      } catch {
+        // Remove unused 'err' parameter and handle error silently
         if (mounted) setProfile(null);
       }
     }
@@ -37,7 +45,12 @@ export default function Header() {
     window.addEventListener('focus', onFocus);
     window.addEventListener('auth:changed', onAuthChanged);
 
-    return () => { mounted = false; window.removeEventListener('storage', onStorage); window.removeEventListener('focus', onFocus); window.removeEventListener('auth:changed', onAuthChanged); };
+    return () => { 
+      mounted = false; 
+      window.removeEventListener('storage', onStorage); 
+      window.removeEventListener('focus', onFocus); 
+      window.removeEventListener('auth:changed', onAuthChanged); 
+    };
   }, []);
 
   const initials = profile?.username ? profile.username.slice(0,2).toUpperCase() : "U";

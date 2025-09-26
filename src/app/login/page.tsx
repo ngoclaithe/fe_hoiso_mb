@@ -3,6 +3,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+// Define interface for login API response
+interface LoginResponse {
+  access_token?: string;
+}
+
+// Define interface for profile data
+interface UserProfile {
+  role?: string;
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const [username, setUsername] = useState("");
@@ -35,7 +45,7 @@ export default function LoginPage() {
         body: JSON.stringify({ username, password }),
       });
       if (!res.ok) throw new Error("Đăng nhập thất bại");
-      const data = await res.json().catch(() => null);
+      const data: LoginResponse = await res.json().catch(() => null);
       if (data?.access_token) {
         try { localStorage.setItem("token", data.access_token); } catch {}
         try { window.dispatchEvent(new Event('auth:changed')); } catch {}
@@ -45,9 +55,12 @@ export default function LoginPage() {
       try {
         const token = data?.access_token || (typeof window !== "undefined" ? localStorage.getItem("token") : null);
         if (token) {
-          const profileRes = await fetch("/api/auth/profile", { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" });
+          const profileRes = await fetch("/api/auth/profile", { 
+            headers: { Authorization: `Bearer ${token}` }, 
+            cache: "no-store" 
+          });
           if (profileRes.ok) {
-            const profile = await profileRes.json().catch(() => null);
+            const profile: UserProfile = await profileRes.json().catch(() => null);
             if (profile?.role === 'admin') {
               router.replace('/admin/dashboard');
               return;
@@ -57,9 +70,12 @@ export default function LoginPage() {
       } catch {}
 
       router.replace("/home");
-    } catch (e: any) {
-      setError(e?.message || "Lỗi không xác định");
-    } finally { setLoading(false); }
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : "Lỗi không xác định";
+      setError(errorMessage);
+    } finally { 
+      setLoading(false); 
+    }
   }
 
   return (

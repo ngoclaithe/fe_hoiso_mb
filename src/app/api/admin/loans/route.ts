@@ -1,6 +1,12 @@
 import { NextRequest } from "next/server";
 import { forwardRaw } from "@/lib/http";
 
+// Define interface for request body
+interface RequestBody {
+  id?: string;
+  [key: string]: unknown;
+}
+
 function buildHeaders(req: NextRequest, contentType?: string) {
   const headers: Record<string, string> = {};
   if (contentType) headers["content-type"] = contentType;
@@ -19,8 +25,12 @@ export async function PATCH(req: NextRequest) {
   const url = new URL(req.url);
   const id = url.searchParams.get("id");
   const text = await req.text().catch(() => "");
-  let body: any = {};
-  try { body = text ? JSON.parse(text) : {}; } catch {}
+  let body: RequestBody = {};
+  try { 
+    body = text ? JSON.parse(text) : {}; 
+  } catch {
+    // Handle JSON parse error silently with empty object
+  }
   const targetId = id || body.id;
   if (!targetId) return new Response(JSON.stringify({ message: "Missing id" }), { status: 400 });
 

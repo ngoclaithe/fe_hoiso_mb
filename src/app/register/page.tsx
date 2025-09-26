@@ -44,9 +44,12 @@ export default function RegisterPage() {
       });
       if (!r.ok) throw new Error("Đăng ký thất bại");
       router.replace("/login");
-    } catch (e: any) {
-      setError(e?.message || "Lỗi không xác định");
-    } finally { setLoading(false); }
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : "Lỗi không xác định";
+      setError(errorMessage);
+    } finally { 
+      setLoading(false); 
+    }
   }
 
   return (
@@ -74,7 +77,7 @@ export default function RegisterPage() {
           </label>
           {error && <p className="text-sm text-red-600">{error}</p>}
           <div className="flex justify-center">
-            <button disabled={loading} type="submit" className="w-64 bg-rose-600 text-white py-3 rounded-xl font-medium disabled:opacity-50">{loading?"Đang đ��ng ký...":"Tạo tài khoản"}</button>
+            <button disabled={loading} type="submit" className="w-64 bg-rose-600 text-white py-3 rounded-xl font-medium disabled:opacity-50">{loading?"Đang đăng ký...":"Tạo tài khoản"}</button>
           </div>
         </form>
         <p className="text-sm mt-3 text-center text-gray-700">Đã có tài khoản? <Link href="/login" className="underline font-medium">Đăng nhập</Link></p>

@@ -4,6 +4,14 @@ import { useEffect, useMemo, useState } from "react";
 import { formatCurrencyVND } from "@/lib/loan";
 import { useRouter } from "next/navigation";
 
+// Define interface for user profile
+interface UserProfile {
+  fullName?: string;
+  username?: string;
+  name?: string;
+  email?: string;
+}
+
 const firstSlides = [
   "https://www.anphabe.com/file-deliver.php?key=hcWDxaBjm7TXnZedhtmlrtKWiG3ZcGOgWtaWr1qhqG5mbluboZ1UoKNrZp1aa2dmZ2maVXHXamiXclaUx8vF1tDYwdrHnNaehp7VnZSgU1ehrg",
   "https://news.mbbank.com.vn/file-service/uploads/v1/images/ee3a94ed-b53c-46e8-89e3-ddd15b0e9449-imagejpg.jpg",
@@ -21,13 +29,13 @@ function maskPhone(phone: string) {
   return phone.slice(0, 3) + "********" + phone.slice(-2);
 }
 
-function getDisplayName(p: any): string {
+function getDisplayName(p: UserProfile | null): string {
   return p?.fullName || p?.username || p?.name || p?.email || "bạn";
 }
 
 export default function Home() {
   const router = useRouter();
-  const [profile, setProfile] = useState<any | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -39,7 +47,7 @@ export default function Home() {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (r.ok) {
-          const data = await r.json().catch(() => null);
+          const data: UserProfile = await r.json().catch(() => null);
           setProfile(data);
         } else {
           try { localStorage.removeItem("token"); } catch {}

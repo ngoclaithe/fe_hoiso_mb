@@ -3,9 +3,40 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+// Define interface for user profile
+interface UserProfile {
+  username: string;
+  email: string;
+  phone?: string;
+  role: string;
+}
+
+// Define interface for loan data
+interface LoanData {
+  fullName?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  occupation?: string;
+  income?: string;
+  hometown?: string;
+  currentAddress?: string;
+  contact1Phone?: string;
+  contact1Relationship?: string;
+  contact2Phone?: string;
+  contact2Relationship?: string;
+  bankName?: string;
+  bankAccountNumber?: string;
+  accountHolderName?: string;
+}
+
+// Define interface for loans API response
+interface LoansApiResponse {
+  data?: LoanData[];
+}
+
 export default function ProfilePage() {
-  const [profile, setProfile] = useState<any>(null);
-  const [latestLoan, setLatestLoan] = useState<any | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [latestLoan, setLatestLoan] = useState<LoanData | null>(null);
   const [loadingLoan, setLoadingLoan] = useState(false);
   const router = useRouter();
 
@@ -14,9 +45,12 @@ export default function ProfilePage() {
       try {
         const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
         if (!token) return;
-        const res = await fetch("/api/auth/profile", { cache: "no-store", headers: token ? { Authorization: `Bearer ${token}` } : undefined });
+        const res = await fetch("/api/auth/profile", { 
+          cache: "no-store", 
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined 
+        });
         if (!res.ok) return;
-        const data = await res.json();
+        const data: UserProfile = await res.json();
         setProfile(data);
       } catch {}
     })();
@@ -28,17 +62,22 @@ export default function ProfilePage() {
         const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
         if (!token) return;
         setLoadingLoan(true);
-        const res = await fetch("/api/my-loans", { cache: "no-store", headers: { Authorization: `Bearer ${token}` } });
+        const res = await fetch("/api/my-loans", { 
+          cache: "no-store", 
+          headers: { Authorization: `Bearer ${token}` } 
+        });
         if (!res.ok) return;
-        const data = await res.json().catch(() => null);
+        const data: LoanData[] | LoansApiResponse = await res.json().catch(() => null);
         // Accept either array or { data: [...] }
         const arr = Array.isArray(data) ? data : (data?.data || []);
         if (arr && arr.length > 0) {
           setLatestLoan(arr[0]);
         }
-      } catch (e) {
-        // ignore
-      } finally { setLoadingLoan(false); }
+      } catch {
+        // Handle error silently - removed unused parameter
+      } finally { 
+        setLoadingLoan(false); 
+      }
     })();
   }, []);
 
@@ -55,7 +94,7 @@ export default function ProfilePage() {
     return 'Khác';
   }
 
-  const initials = profile?.username ? profile.username.slice(0,2).toUpperCase() : "U";
+  // Removed unused 'initials' variable
 
   return (
     <div>

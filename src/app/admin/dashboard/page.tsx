@@ -1,9 +1,22 @@
 "use client";
 import { useEffect, useState } from "react";
 
+// Define interface for User object
+interface User {
+  id: string;
+  username?: string;
+  email?: string;
+  role: string;
+}
+
+// Define interface for API response
+interface UsersApiResponse {
+  data?: User[];
+}
+
 export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   async function load() {
@@ -11,16 +24,22 @@ export default function AdminDashboardPage() {
     setError(null);
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      const res = await fetch('/api/admin/users', { headers: token ? { Authorization: `Bearer ${token}` } : undefined, cache: 'no-store' });
+      const res = await fetch('/api/admin/users', { 
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined, 
+        cache: 'no-store' 
+      });
       if (!res.ok) {
         const t = await res.text().catch(() => '');
         throw new Error(t || `Server error ${res.status}`);
       }
-      const data = await res.json();
+      const data: User[] | UsersApiResponse = await res.json();
       setUsers(Array.isArray(data) ? data : data.data || []);
-    } catch (e: any) {
-      setError(e?.message || 'Lỗi tải danh sách người dùng');
-    } finally { setLoading(false); }
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : 'Lỗi tải danh sách người dùng';
+      setError(errorMessage);
+    } finally { 
+      setLoading(false); 
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -29,11 +48,15 @@ export default function AdminDashboardPage() {
     if (!confirm('Bạn có chắc muốn xóa người dùng này?')) return;
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      const res = await fetch(`/api/admin/users?id=${encodeURIComponent(id)}`, { method: 'DELETE', headers: token ? { Authorization: `Bearer ${token}` } : undefined });
+      const res = await fetch(`/api/admin/users?id=${encodeURIComponent(id)}`, { 
+        method: 'DELETE', 
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined 
+      });
       if (!res.ok) throw new Error('Xóa thất bại');
       await load();
-    } catch (e: any) {
-      alert(e?.message || 'Không thể xóa');
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : 'Không thể xóa';
+      alert(errorMessage);
     }
   }
 
