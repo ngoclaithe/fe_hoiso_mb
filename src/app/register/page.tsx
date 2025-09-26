@@ -39,13 +39,7 @@ export default function RegisterPage() {
         credentials: "include",
       });
       if (!r.ok) throw new Error("Đăng ký thất bại");
-      await fetch(publicApiUrl("/auth/login"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-        credentials: "include",
-      });
-      router.replace("/home");
+      router.replace("/login");
     } catch (e: any) {
       setError(e?.message || "Lỗi không xác định");
     } finally { setLoading(false); }
