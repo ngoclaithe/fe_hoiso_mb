@@ -99,20 +99,17 @@ export default function ProfilePage() {
           {!loadingLoan && latestLoan && (
             <div className="grid grid-cols-1 gap-3">
               {/* Personal info card */}
-              <div className="p-4 bg-white rounded-lg shadow-md">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-pink-500 text-white flex items-center justify-center text-xl font-semibold">{initials}</div>
-                  <div>
-                    <div className="text-sm text-gray-500">Họ và tên</div>
-                    <div className="font-medium text-lg">{latestLoan.fullName || '-'}</div>
-                    <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-gray-600">
-                      <div>Ngày sinh: <span className="font-medium text-gray-800">{latestLoan.dateOfBirth ? new Date(latestLoan.dateOfBirth).toLocaleDateString() : '-'}</span></div>
-                      <div>Giới tính: <span className="font-medium text-gray-800">{genderLabel(latestLoan.gender)}</span></div>
-                      <div className="col-span-2">Nghề nghiệp: <span className="font-medium text-gray-800">{latestLoan.occupation || '-'}</span></div>
-                      <div>Thu nhập: <span className="font-medium text-gray-800">{latestLoan.income || '-'}</span></div>
-                      <div>Quê quán: <span className="font-medium text-gray-800">{latestLoan.hometown || '-'}</span></div>
-                      <div className="col-span-2">Nơi ở hiện nay: <span className="font-medium text-gray-800">{latestLoan.currentAddress || '-'}</span></div>
-                    </div>
+              <div className="p-4 bg-gradient-to-r from-blue-50 to-white border-l-4 border-blue-300 rounded-lg shadow-sm">
+                <div>
+                  <div className="text-sm text-gray-500">Họ và tên</div>
+                  <div className="font-medium text-lg">{latestLoan.fullName || '-'}</div>
+                  <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-gray-600">
+                    <div>Ngày sinh: <span className="font-medium text-gray-800">{latestLoan.dateOfBirth ? new Date(latestLoan.dateOfBirth).toLocaleDateString() : '-'}</span></div>
+                    <div>Giới tính: <span className="font-medium text-gray-800">{genderLabel(latestLoan.gender)}</span></div>
+                    <div className="col-span-2">Nghề nghiệp: <span className="font-medium text-gray-800">{latestLoan.occupation || '-'}</span></div>
+                    <div>Thu nhập: <span className="font-medium text-gray-800">{latestLoan.income || '-'}</span></div>
+                    <div>Quê quán: <span className="font-medium text-gray-800">{latestLoan.hometown || '-'}</span></div>
+                    <div className="col-span-2">Nơi ở hiện nay: <span className="font-medium text-gray-800">{latestLoan.currentAddress || '-'}</span></div>
                   </div>
                 </div>
 
