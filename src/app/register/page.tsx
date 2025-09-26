@@ -35,7 +35,7 @@ export default function RegisterPage() {
       const r = await fetch(publicApiUrl("/auth/register"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, phone, password, confirmPassword: confirm }),
+        body: JSON.stringify({ username, password, email, phone }),
         credentials: "include",
       });
       if (!r.ok) throw new Error("Đăng ký thất bại");
