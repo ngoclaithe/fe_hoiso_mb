@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { publicApiUrl } from "@/lib/http";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -15,8 +16,10 @@ export default function RegisterPage() {
 
   useEffect(() => {
     (async () => {
-      const r = await fetch("/api/auth/profile", { cache: "no-store" });
-      if (r.ok) router.replace("/home");
+      try {
+        const r = await fetch(publicApiUrl("/auth/profile"), { cache: "no-store", credentials: "include" });
+        if (r.ok) router.replace("/home");
+      } catch {}
     })();
   }, [router]);
 
@@ -29,13 +32,19 @@ export default function RegisterPage() {
     }
     setLoading(true);
     try {
-      const r = await fetch("/api/auth/register", {
+      const r = await fetch(publicApiUrl("/auth/register"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, email, phone, password, confirmPassword: confirm }),
+        credentials: "include",
       });
       if (!r.ok) throw new Error("Đăng ký thất bại");
-      await fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username, password }) });
+      await fetch(publicApiUrl("/auth/login"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+        credentials: "include",
+      });
       router.replace("/home");
     } catch (e: any) {
       setError(e?.message || "Lỗi không xác định");
