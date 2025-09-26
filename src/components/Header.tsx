@@ -14,8 +14,8 @@ export default function Header() {
           if (mounted) setProfile(null);
           return;
         }
-        // If server proxy strips Authorization, use token query fallback
-        const res = await fetch(token ? `/api/auth/profile?token=${encodeURIComponent(token)}` : "/api/auth/profile", { cache: "no-store" });
+        // Fetch profile via BFF; rely on cookie or forwarded Authorization header
+        const res = await fetch("/api/auth/profile", { cache: "no-store", headers: token ? { Authorization: `Bearer ${token}` } : undefined });
         if (!res.ok) {
           if (mounted) setProfile(null);
           return;
