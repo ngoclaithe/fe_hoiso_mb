@@ -1,117 +1,24 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { formatCurrencyVND } from "@/lib/loan";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-const firstSlides = [
-  "https://www.anphabe.com/file-deliver.php?key=hcWDxaBjm7TXnZedhtmlrtKWiG3ZcGOgWtaWr1qhqG5mbluboZ1UoKNrZp1aa2dmZ2maVXHXamiXclaUx8vF1tDYwdrHnNaehp7VnZSgU1ehrg",
-  "https://news.mbbank.com.vn/file-service/uploads/v1/images/ee3a94ed-b53c-46e8-89e3-ddd15b0e9449-imagejpg.jpg",
-  "https://statictttc.kinhtedothi.vn/zoom/1000/Uploaded/nguyengiang/2024_11_04/screenshot_2024-09-03_070257_BTOS.jpg",
-];
-
-const secondSlides = [
-  "https://hopdongdientuhanoi.mobifone.vn/wp-content/uploads/2025/04/vay-tien-bang-cccd.jpg",
-  "https://cdn.chanhtuoi.com/uploads/2022/08/vay-tien-chi-can-cmnd-va-bang-lai-01.jpg",
-  "https://simg.zalopay.com.vn/zlp-website/assets/app_vay_tien_online_9_4fe133af9d.jpg",
-];
-
-function maskPhone(phone: string) {
-  if (phone.length < 5) return phone;
-  return phone.slice(0, 3) + "********" + phone.slice(-2);
-}
-
-export default function Home() {
-  const [username, setUsername] = useState<string | null>(null);
+export default function Entry() {
+  const router = useRouter();
   useEffect(() => {
-    try {
-      const u = localStorage.getItem("app.username");
-      setUsername(u);
-    } catch {}
-  }, []);
-
-  const activities = useMemo(() => {
-    const phones = [
-      "03312345682",
-      "09876543210",
-      "09011223345",
-      "09155667788",
-      "09733445566",
-      "08566778899",
-      "08244556677",
-      "08812349876",
-      "07099887766",
-      "03955667788",
-    ];
-    const amounts = [
-      100_000_000,
-      50_000_000,
-      200_000_000,
-      80_000_000,
-      150_000_000,
-      120_000_000,
-      90_000_000,
-      60_000_000,
-      110_000_000,
-      75_000_000,
-    ];
-    return phones.map((p, i) => `${maskPhone(p)} đã rút ${formatCurrencyVND(amounts[i])}`);
-  }, []);
+    (async () => {
+      const r = await fetch("/api/auth/profile", { cache: "no-store" });
+      if (r.ok) router.replace("/home");
+    })();
+  }, [router]);
 
   return (
-    <div className="px-4 pb-8">
-      <header className="py-4">
-        {username ? (
-          <h1 className="text-xl font-semibold">Xin chào, {username}</h1>
-        ) : (
-          <div className="flex items-center justify-between gap-3">
-            <h1 className="text-xl font-semibold">Xin chào</h1>
-            <div className="flex gap-2">
-              <Link href="/login" className="px-3 py-1 rounded-full border text-sm">Đăng nhập</Link>
-              <Link href="/register" className="px-3 py-1 rounded-full border text-sm">Đăng ký</Link>
-            </div>
-          </div>
-        )}
-      </header>
-
-      <section aria-label="recent-approvals" className="mb-4">
-        <div className="flex overflow-x-auto gap-3 snap-x snap-mandatory no-scrollbar">
-          {activities.map((a, idx) => (
-            <div key={idx} className="snap-start shrink-0 px-3 py-2 rounded-full border text-xs whitespace-nowrap">
-              {a}
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="mb-4">
-        <div className="flex overflow-x-auto gap-3 snap-x snap-mandatory no-scrollbar">
-          {firstSlides.map((src, i) => (
-            <div key={i} className="snap-center shrink-0 w-[360px] h-[160px] rounded-lg overflow-hidden border">
-              <img src={src} alt={`slide-${i + 1}`} className="w-full h-full object-cover" />
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <div className="mb-4">
-        <Link href="/apply" className="block w-full text-center bg-blue-600 text-white py-3 rounded-lg font-medium">Đăng ký khoản vay</Link>
+    <div className="px-4 py-10">
+      <h1 className="text-2xl font-semibold mb-6">Chào mừng</h1>
+      <div className="space-y-3">
+        <Link href="/login" className="block w-full text-center bg-blue-600 text-white py-3 rounded-lg">Đăng nhập</Link>
+        <Link href="/register" className="block w-full text-center border py-3 rounded-lg">Đăng ký</Link>
       </div>
-
-      <ul className="text-sm space-y-1 mb-4">
-        <li>• Thủ tục vay nhanh chóng, đơn giản</li>
-        <li>• Hạn mức vay lên đến 500 tr VNĐ</li>
-        <li>• Nhận tiền chỉ sau 30 phút làm hồ sơ</li>
-      </ul>
-
-      <section>
-        <div className="flex overflow-x-auto gap-3 snap-x snap-mandatory no-scrollbar">
-          {secondSlides.map((src, i) => (
-            <div key={i} className="snap-center shrink-0 w-[360px] h-[160px] rounded-lg overflow-hidden border">
-              <img src={src} alt={`info-${i + 1}`} className="w-full h-full object-cover" />
-            </div>
-          ))}
-        </div>
-      </section>
     </div>
   );
 }
