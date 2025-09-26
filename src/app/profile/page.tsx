@@ -18,19 +18,25 @@ export default function ProfilePage() {
     })();
   }, []);
 
+  const initials = profile?.username ? profile.username.slice(0,2).toUpperCase() : "U";
+
   return (
     <div className="p-4">
-      <h1 className="text-lg font-semibold mb-3">Hồ sơ cá nhân</h1>
-      <div className="bg-white p-4 rounded-lg border mb-3">
-        <div className="text-sm text-gray-600">Tên đăng nhập</div>
-        <div className="font-medium">{profile?.username || "-"}</div>
-        <div className="text-sm text-gray-600 mt-2">Email</div>
-        <div className="font-medium">{profile?.email || "-"}</div>
-      </div>
+      <div className="bg-white p-4 rounded-lg shadow">
+        <div className="flex items-center gap-4">
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500 to-pink-500 text-white flex items-center justify-center text-2xl font-semibold">{initials}</div>
+          <div>
+            <div className="text-sm text-gray-500">Tên đăng nhập</div>
+            <div className="font-medium text-lg">{profile?.username || "-"}</div>
+            <div className="text-sm text-gray-500 mt-2">Email</div>
+            <div className="font-medium">{profile?.email || "-"}</div>
+          </div>
+        </div>
 
-      <div className="space-y-2">
-        <Link href="/history" className="block w-full text-center bg-blue-600 text-white py-2 rounded-lg">Lịch sử hồ sơ vay</Link>
-        <button onClick={() => { localStorage.removeItem("token"); window.location.href = "/login"; }} className="w-full border py-2 rounded-lg">Đăng xuất</button>
+        <div className="grid grid-cols-2 gap-3 mt-4">
+          <Link href="/history" className="block text-center bg-blue-600 text-white py-2 rounded-lg">Lịch sử hồ sơ vay</Link>
+          <button onClick={() => { localStorage.removeItem("token"); window.location.href = "/login"; }} className="w-full border py-2 rounded-lg">Đăng xuất</button>
+        </div>
       </div>
     </div>
   );
