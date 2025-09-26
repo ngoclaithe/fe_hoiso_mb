@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { calcMonthlyInstallment, formatCurrencyVND, Gender, VN_BANKS, todayISO } from "@/lib/loan";
 import { useRouter } from "next/navigation";
 
@@ -35,6 +35,10 @@ export default function ApplyPage() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<{front?: File; back?: File; portrait?: File}>({});
+  const [preview, setPreview] = useState<{front?: string; back?: string; portrait?: string}>({});
+  const frontInputRef = useRef<HTMLInputElement>(null);
+  const backInputRef = useRef<HTMLInputElement>(null);
+  const portraitInputRef = useRef<HTMLInputElement>(null);
   const [f, setF] = useState<LoanForm>({
     loanAmount: 20_000_000,
     loanTermMonths: 6,
@@ -163,9 +167,10 @@ export default function ApplyPage() {
   }
 
   return (
-    <div className="px-4 py-4">
+    <div className="min-h-screen p-4 bg-gradient-to-b from-blue-500 via-indigo-500 to-purple-500">
+      <div className="mt-4 bg-white/95 backdrop-blur rounded-2xl shadow p-5">
       <div className="flex items-center gap-3 mb-3">
-        <button onClick={prev} disabled={step===1} className="text-sm px-3 py-1 rounded-full border disabled:opacity-50">Trở lại</button>
+        <button onClick={() => { if (step===1) router.replace("/home"); else prev(); }} className="text-sm px-3 py-1 rounded-full border">Trở lại</button>
         <div className="flex-1">
           <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
             <div className="h-full bg-blue-600" style={{ width: `${((step - 1) / 4) * 100}%` }} />
@@ -180,13 +185,19 @@ export default function ApplyPage() {
             Số tiền vay (20.000.000 - 500.000.000)
             <input type="number" min={20000000} max={500000000} value={f.loanAmount}
               onChange={(e)=>set("loanAmount", Math.min(500000000, Math.max(20000000, Number(e.target.value||0))))}
-              className="mt-1 w-full border rounded-lg px-3 py-2" />
+              className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </label>
           <label className="block text-sm">
-            Thời hạn vay (6 - 36 tháng)
-            <input type="number" min={6} max={36} value={f.loanTermMonths}
-              onChange={(e)=>set("loanTermMonths", Math.min(36, Math.max(6, Number(e.target.value||0))))}
-              className="mt-1 w-full border rounded-lg px-3 py-2" />
+            Thời hạn vay
+            <select
+              className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={f.loanTermMonths}
+              onChange={(e)=>set("loanTermMonths", Number(e.target.value))}
+            >
+              {[6,12,18,24,30,36].map((m)=> (
+                <option key={m} value={m}>{m} tháng</option>
+              ))}
+            </select>
           </label>
 
           <div className="rounded-lg border p-3 text-sm space-y-1">
@@ -216,29 +227,29 @@ export default function ApplyPage() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">Thông tin cá nhân</h2>
           <label className="block text-sm">Họ và tên
-            <input className="mt-1 w-full border rounded-lg px-3 py-2" value={f.fullName} onChange={(e)=>set("fullName", e.target.value)} />
+            <input className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={f.fullName} onChange={(e)=>set("fullName", e.target.value)} />
           </label>
           <label className="block text-sm">Giới tính
-            <select className="mt-1 w-full border rounded-lg px-3 py-2" value={f.gender} onChange={(e)=>set("gender", e.target.value as Gender)}>
+            <select className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={f.gender} onChange={(e)=>set("gender", e.target.value as Gender)}>
               <option value={Gender.MALE}>Nam</option>
               <option value={Gender.FEMALE}>Nữ</option>
               <option value={Gender.OTHER}>Khác</option>
             </select>
           </label>
           <label className="block text-sm">Ngày sinh
-            <input type="date" className="mt-1 w-full border rounded-lg px-3 py-2" value={f.dateOfBirth.slice(0,10)} onChange={(e)=>set("dateOfBirth", new Date(e.target.value).toISOString())} />
+            <input type="date" className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={f.dateOfBirth.slice(0,10)} onChange={(e)=>set("dateOfBirth", new Date(e.target.value).toISOString())} />
           </label>
           <label className="block text-sm">Số CCCD
-            <input className="mt-1 w-full border rounded-lg px-3 py-2" value={f.citizenId} onChange={(e)=>set("citizenId", e.target.value)} />
+            <input className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={f.citizenId} onChange={(e)=>set("citizenId", e.target.value)} />
           </label>
           <label className="block text-sm">Nơi ở hiện nay
-            <input className="mt-1 w-full border rounded-lg px-3 py-2" value={f.currentAddress} onChange={(e)=>set("currentAddress", e.target.value)} />
+            <input className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={f.currentAddress} onChange={(e)=>set("currentAddress", e.target.value)} />
           </label>
           <label className="block text-sm">Địa chỉ thường trú
-            <input className="mt-1 w-full border rounded-lg px-3 py-2" value={f.permanentAddress} onChange={(e)=>set("permanentAddress", e.target.value)} />
+            <input className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={f.permanentAddress} onChange={(e)=>set("permanentAddress", e.target.value)} />
           </label>
           <label className="block text-sm">Quê quán
-            <input className="mt-1 w-full border rounded-lg px-3 py-2" value={f.hometown} onChange={(e)=>set("hometown", e.target.value)} />
+            <input className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={f.hometown} onChange={(e)=>set("hometown", e.target.value)} />
           </label>
           <div className="flex gap-2">
             <button onClick={prev} className="flex-1 border rounded-lg py-2">Trở lại</button>
@@ -249,19 +260,39 @@ export default function ApplyPage() {
 
       {step === 3 && (
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold">Tải ảnh giấy tờ</h2>
-          <label className="block text-sm">Ảnh mặt trước
-            <input type="file" accept="image/*" className="mt-1 w-full" onChange={(e)=> setImages((p)=>({ ...p, front: e.target.files?.[0] }))} />
-          </label>
-          <label className="block text-sm">Ảnh mặt sau
-            <input type="file" accept="image/*" className="mt-1 w-full" onChange={(e)=> setImages((p)=>({ ...p, back: e.target.files?.[0] }))} />
-          </label>
-          <label className="block text-sm">Ảnh chân dung
-            <input type="file" accept="image/*" className="mt-1 w-full" onChange={(e)=> setImages((p)=>({ ...p, portrait: e.target.files?.[0] }))} />
-          </label>
-          <p className="text-xs text-gray-500">Chỉ chọn ảnh, upload sẽ thực hiện khi tạo hồ sơ.</p>
+          <h2 className="text-lg font-semibold">Thông tin giấy tờ</h2>
+
+          <input ref={frontInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e)=>{
+            const file = e.target.files?.[0];
+            setImages((p)=>({ ...p, front: file }));
+            setPreview((pv)=>{ if(pv.front) URL.revokeObjectURL(pv.front); return { ...pv, front: file? URL.createObjectURL(file): undefined }; });
+          }} />
+          <input ref={backInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e)=>{
+            const file = e.target.files?.[0];
+            setImages((p)=>({ ...p, back: file }));
+            setPreview((pv)=>{ if(pv.back) URL.revokeObjectURL(pv.back); return { ...pv, back: file? URL.createObjectURL(file): undefined }; });
+          }} />
+          <input ref={portraitInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e)=>{
+            const file = e.target.files?.[0];
+            setImages((p)=>({ ...p, portrait: file }));
+            setPreview((pv)=>{ if(pv.portrait) URL.revokeObjectURL(pv.portrait); return { ...pv, portrait: file? URL.createObjectURL(file): undefined }; });
+          }} />
+
+          <div className="grid grid-cols-3 gap-3">
+            <button type="button" onClick={()=>frontInputRef.current?.click()} className="w-full h-40 rounded-lg overflow-hidden border bg-gray-100">
+              {preview.front && <img src={preview.front} alt="front" className="w-full h-full object-cover" />}
+            </button>
+            <button type="button" onClick={()=>backInputRef.current?.click()} className="w-full h-40 rounded-lg overflow-hidden border bg-gray-100">
+              {preview.back && <img src={preview.back} alt="back" className="w-full h-full object-cover" />}
+            </button>
+            <button type="button" onClick={()=>portraitInputRef.current?.click()} className="w-full h-40 rounded-lg overflow-hidden border bg-gray-100">
+              {preview.portrait && <img src={preview.portrait} alt="portrait" className="w-full h-full object-cover" />}
+            </button>
+          </div>
+
+          <p className="text-xs text-gray-500">Chọn ảnh, upload sẽ diễn ra khi tạo hồ sơ.</p>
           <div className="flex gap-2">
-            <button onClick={prev} className="flex-1 border rounded-lg py-2">Trở lại</button>
+            <button onClick={()=> (step===1? router.replace("/home"): prev())} className="flex-1 border rounded-lg py-2">Trở lại</button>
             <button onClick={next} className="flex-1 bg-blue-600 text-white rounded-lg py-2">Tiếp tục</button>
           </div>
         </section>
@@ -271,30 +302,38 @@ export default function ApplyPage() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">Công việc & liên hệ</h2>
           <label className="block text-sm">Nghề nghiệp
-            <input className="mt-1 w-full border rounded-lg px-3 py-2" value={f.occupation} onChange={(e)=>set("occupation", e.target.value)} />
+            <input className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={f.occupation} onChange={(e)=>set("occupation", e.target.value)} />
           </label>
           <label className="block text-sm">Thu nhập
-            <select className="mt-1 w-full border rounded-lg px-3 py-2" value={String(f.income)} onChange={(e)=>set("income", Number(e.target.value))}>
+            <select className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={String(f.income)} onChange={(e)=>set("income", Number(e.target.value))}>
               <option value={5000000}>Dưới 7 triệu</option>
               <option value={12000000}>Từ 7 triệu đến 15 triệu</option>
-              <option value={20000000}>Từ 15 triệu đến 25 triệu</option>
+              <option value={20000000}>Từ 15 triệu đ���n 25 triệu</option>
               <option value={30000000}>Trên 25 triệu</option>
             </select>
           </label>
           <label className="block text-sm">Mục đích khoản vay
-            <input className="mt-1 w-full border rounded-lg px-3 py-2" value={f.loanPurpose} onChange={(e)=>set("loanPurpose", e.target.value)} />
+            <input className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={f.loanPurpose} onChange={(e)=>set("loanPurpose", e.target.value)} />
           </label>
           <label className="block text-sm">Số điện thoại người thân 1
-            <input className="mt-1 w-full border rounded-lg px-3 py-2" value={f.contact1Phone} onChange={(e)=>set("contact1Phone", e.target.value)} />
+            <input className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={f.contact1Phone} onChange={(e)=>set("contact1Phone", e.target.value)} />
           </label>
           <label className="block text-sm">Quan hệ với người thân 1
-            <input className="mt-1 w-full border rounded-lg px-3 py-2" value={f.contact1Relationship} onChange={(e)=>set("contact1Relationship", e.target.value)} />
+            <select className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={f.contact1Relationship} onChange={(e)=>set("contact1Relationship", e.target.value)}>
+              {['Bố','Mẹ','Anh em ruột','Anh em họ','Bạn bè'].map((r)=> (
+                <option key={r} value={r}>{r}</option>
+              ))}
+            </select>
           </label>
           <label className="block text-sm">Số điện thoại người thân 2
-            <input className="mt-1 w-full border rounded-lg px-3 py-2" value={f.contact2Phone} onChange={(e)=>set("contact2Phone", e.target.value)} />
+            <input className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={f.contact2Phone} onChange={(e)=>set("contact2Phone", e.target.value)} />
           </label>
           <label className="block text-sm">Quan hệ với người thân 2
-            <input className="mt-1 w-full border rounded-lg px-3 py-2" value={f.contact2Relationship} onChange={(e)=>set("contact2Relationship", e.target.value)} />
+            <select className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={f.contact2Relationship} onChange={(e)=>set("contact2Relationship", e.target.value)}>
+              {['Bố','Mẹ','Anh em ruột','Anh em họ','Bạn bè'].map((r)=> (
+                <option key={r} value={r}>{r}</option>
+              ))}
+            </select>
           </label>
           <div className="flex gap-2">
             <button onClick={prev} className="flex-1 border rounded-lg py-2">Trở lại</button>
@@ -307,20 +346,20 @@ export default function ApplyPage() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">Tài khoản nhận tiền</h2>
           <label className="block text-sm">Tên ngân hàng
-            <select className="mt-1 w-full border rounded-lg px-3 py-2" value={f.bankName} onChange={(e)=>set("bankName", e.target.value)}>
+            <select className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={f.bankName} onChange={(e)=>set("bankName", e.target.value)}>
               {VN_BANKS.map((b)=> (
                 <option key={b} value={b}>{b}</option>
               ))}
             </select>
           </label>
           <label className="block text-sm">Số tài khoản thụ hưởng
-            <input className="mt-1 w-full border rounded-lg px-3 py-2" value={f.bankAccountNumber} onChange={(e)=>set("bankAccountNumber", e.target.value)} />
+            <input className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={f.bankAccountNumber} onChange={(e)=>set("bankAccountNumber", e.target.value)} />
           </label>
           <label className="block text-sm">Tên thụ hưởng
-            <input className="mt-1 w-full border rounded-lg px-3 py-2" value={f.accountHolderName} onChange={(e)=>set("accountHolderName", e.target.value)} />
+            <input className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={f.accountHolderName} onChange={(e)=>set("accountHolderName", e.target.value)} />
           </label>
           <label className="block text-sm">Ngày thanh toán hàng tháng
-            <select className="mt-1 w-full border rounded-lg px-3 py-2" value={f.monthlyPaymentDate} onChange={(e)=>set("monthlyPaymentDate", Number(e.target.value))}>
+            <select className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={f.monthlyPaymentDate} onChange={(e)=>set("monthlyPaymentDate", Number(e.target.value))}>
               {Array.from({length:31}, (_,i)=>i+1).map((d)=> (
                 <option key={d} value={d}>{d}</option>
               ))}
@@ -330,6 +369,7 @@ export default function ApplyPage() {
           <button disabled={loading} onClick={submit} className="w-full bg-blue-600 text-white py-3 rounded-lg disabled:opacity-50">{loading?"Đang tạo...":"Tạo hồ sơ"}</button>
         </section>
       )}
+      </div>
     </div>
   );
 }
