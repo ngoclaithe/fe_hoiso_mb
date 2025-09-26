@@ -39,6 +39,7 @@ export default function LoginPage() {
       const data = await res.json().catch(() => null);
       if (data?.access_token) {
         try { localStorage.setItem("token", data.access_token); } catch {}
+        try { window.dispatchEvent(new Event('auth:changed')); } catch {}
       }
 
       // Fetch profile to decide redirect
