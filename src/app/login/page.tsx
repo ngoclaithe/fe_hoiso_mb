@@ -46,7 +46,7 @@ export default function LoginPage() {
       try {
         const token = data?.access_token || (typeof window !== "undefined" ? localStorage.getItem("token") : null);
         if (token) {
-          const profileRes = await fetch(publicApiUrl("/auth/profile"), { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" });
+          const profileRes = await fetch("/api/auth/profile", { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" });
           if (profileRes.ok) {
             const profile = await profileRes.json().catch(() => null);
             if (profile?.role === 'admin') {
