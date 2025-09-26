@@ -3,7 +3,6 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { formatCurrencyVND } from "@/lib/loan";
 import { useRouter } from "next/navigation";
-import { publicApiUrl } from "@/lib/http";
 
 const firstSlides = [
   "https://www.anphabe.com/file-deliver.php?key=hcWDxaBjm7TXnZedhtmlrtKWiG3ZcGOgWtaWr1qhqG5mbluboZ1UoKNrZp1aa2dmZ2maVXHXamiXclaUx8vF1tDYwdrHnNaehp7VnZSgU1ehrg",
@@ -35,7 +34,7 @@ export default function Home() {
       try {
         const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
         if (!token) { router.replace("/"); return; }
-        const r = await fetch(publicApiUrl("/auth/profile"), {
+        const r = await fetch("/api/auth/profile", {
           cache: "no-store",
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -131,8 +130,8 @@ export default function Home() {
         </div>
       </section>
 
-      <div className="mb-4">
-        <Link href="/apply" className="block w-full text-center bg-blue-600 text-white py-3 rounded-lg font-medium">Đăng ký khoản vay</Link>
+      <div className="mb-4 flex justify-center">
+        <Link href="/apply" className="w-60 text-center bg-blue-600 text-white py-3 rounded-lg font-medium">Đăng ký khoản vay</Link>
       </div>
 
       <ul className="text-sm space-y-1 mb-4">

@@ -26,6 +26,27 @@ export enum Gender {
   OTHER = "OTHER",
 }
 
+export enum LoanStatus {
+  PENDING = 'pending',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+  ACTIVE = 'active',
+  COMPLETED = 'completed',
+  OVERDUE = 'overdue'
+}
+
+export function loanStatusLabel(status?: string) {
+  switch ((status || '').toLowerCase()) {
+    case LoanStatus.PENDING: return 'Đang chờ';
+    case LoanStatus.APPROVED: return 'Đã duyệt';
+    case LoanStatus.REJECTED: return 'Từ chối';
+    case LoanStatus.ACTIVE: return 'Đang vay';
+    case LoanStatus.COMPLETED: return 'Hoàn thành';
+    case LoanStatus.OVERDUE: return 'Quá hạn';
+    default: return status || '-';
+  }
+}
+
 export const VN_BANKS: string[] = [
   "Vietcombank",
   "VietinBank",

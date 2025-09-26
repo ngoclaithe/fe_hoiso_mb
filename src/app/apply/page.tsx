@@ -30,15 +30,36 @@ type LoanForm = {
   portraitUrl?: string;
 };
 
+type DocSlot = "front" | "back" | "portrait";
+
+type Signature = {
+  cloud_name: string;
+  api_key: string;
+  signature: string;
+  timestamp: number;
+  upload_preset?: string;
+  folder?: string;
+  tags?: string;
+  transformation?: string;
+};
+
 export default function ApplyPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<{front?: File; back?: File; portrait?: File}>({});
   const [preview, setPreview] = useState<{front?: string; back?: string; portrait?: string}>({});
-  const frontInputRef = useRef<HTMLInputElement>(null);
-  const backInputRef = useRef<HTMLInputElement>(null);
-  const portraitInputRef = useRef<HTMLInputElement>(null);
+  const [pickerFor, setPickerFor] = useState<DocSlot | null>(null);
+
+  // Gallery inputs
+  const frontFileRef = useRef<HTMLInputElement>(null);
+  const backFileRef = useRef<HTMLInputElement>(null);
+  const portraitFileRef = useRef<HTMLInputElement>(null);
+  // Camera inputs
+  const frontCamRef = useRef<HTMLInputElement>(null);
+  const backCamRef = useRef<HTMLInputElement>(null);
+  const portraitCamRef = useRef<HTMLInputElement>(null);
+
   const [f, setF] = useState<LoanForm>({
     loanAmount: 20_000_000,
     loanTermMonths: 6,
@@ -78,28 +99,52 @@ export default function ApplyPage() {
     setF((prev) => ({ ...prev, [key]: value }));
   }
 
-  async function uploadToCloudinary(file: File, sig: any): Promise<string> {
+  function getResourceType(file: File, override?: string): string {
+    if (override) return override;
+    if (file.type.startsWith("image/")) return "image";
+    if (file.type.startsWith("video/")) return "video";
+    if (file.type.startsWith("audio/")) return "video";
+    return "auto";
+  }
+
+  async function uploadToCloudinary(file: File, sig: Signature, resourceType?: string): Promise<string> {
     const form = new FormData();
     form.append("file", file);
-    if (sig.upload_preset) form.append("upload_preset", String(sig.upload_preset));
-    if (sig.folder) form.append("folder", String(sig.folder));
-    if (sig.tags) form.append("tags", String(sig.tags));
-    if (sig.transformation) form.append("transformation", String(sig.transformation));
-    form.append("api_key", String(sig.api_key));
-    form.append("timestamp", String(sig.timestamp));
     form.append("signature", String(sig.signature));
-    form.append("use_filename", String(sig.use_filename));
-    form.append("unique_filename", String(sig.unique_filename));
-    form.append("overwrite", String(sig.overwrite));
+    form.append("api_key", String(sig.api_key));
 
-    const cloudName = String(sig.cloud_name);
-    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
-      method: "POST",
-      body: form,
+    const signedParams = [
+      "timestamp",
+      "upload_preset",
+      "folder",
+      "tags",
+      "transformation",
+    ] as const;
+
+    (signedParams as readonly string[]).forEach((k) => {
+      const v = (sig as any)[k];
+      if (v !== undefined && v !== null) form.append(k, String(v));
     });
-    if (!res.ok) throw new Error("Upload thất bại");
+
+    const type = resourceType || getResourceType(file);
+    const uploadUrl = `https://api.cloudinary.com/v1_1/${sig.cloud_name}/${type}/upload`;
+
+    const res = await fetch(uploadUrl, { method: "POST", body: form });
+    if (!res.ok) {
+      const err = await res.text().catch(() => "");
+      throw new Error(err || "Upload thất bại");
+    }
     const data = await res.json();
     return data.secure_url || data.url;
+  }
+
+  function applySelectedFile(slot: DocSlot, file: File | undefined) {
+    setImages((p) => ({ ...p, [slot]: file }));
+    setPreview((pv) => {
+      const prevUrl = pv[slot];
+      if (prevUrl) URL.revokeObjectURL(prevUrl);
+      return { ...pv, [slot]: file ? URL.createObjectURL(file) : undefined } as typeof pv;
+    });
   }
 
   async function submit() {
@@ -110,13 +155,19 @@ export default function ApplyPage() {
       let portraitUrl: string | undefined;
 
       if (images.front || images.back || images.portrait) {
-        const sigRes = await fetch("/api/signature", { cache: "no-store" });
+        const options = { resource_type: "image" };
+        const sigRes = await fetch("/api/signature", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(options),
+          cache: "no-store",
+        });
         if (!sigRes.ok) throw new Error("Không lấy được chữ ký Cloudinary");
-        const sig = await sigRes.json();
+        const sig: Signature = await sigRes.json();
 
-        if (images.front) citizenIdFrontUrl = await uploadToCloudinary(images.front, sig);
-        if (images.back) citizenIdBackUrl = await uploadToCloudinary(images.back, sig);
-        if (images.portrait) portraitUrl = await uploadToCloudinary(images.portrait, sig);
+        if (images.front) citizenIdFrontUrl = await uploadToCloudinary(images.front, sig, "image");
+        if (images.back) citizenIdBackUrl = await uploadToCloudinary(images.back, sig, "image");
+        if (images.portrait) portraitUrl = await uploadToCloudinary(images.portrait, sig, "image");
       }
 
       const payload = {
@@ -128,7 +179,7 @@ export default function ApplyPage() {
         citizenIdFrontUrl,
         citizenIdBackUrl,
         portraitUrl,
-        gender: f.gender,
+        gender: String(f.gender).toLowerCase(),
         dateOfBirth: f.dateOfBirth,
         occupation: f.occupation,
         income: Number(f.income),
@@ -146,15 +197,21 @@ export default function ApplyPage() {
         monthlyPaymentDate: Number(f.monthlyPaymentDate),
       };
 
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      try {
+        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+      } catch {}
+
       const res = await fetch("/api/loans", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err?.message || "Tạo hồ sơ thất bại");
+        throw new Error((err as any)?.message || "Tạo hồ sơ thất bại");
       }
 
       alert("Tạo hồ sơ thành công");
@@ -262,33 +319,78 @@ export default function ApplyPage() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">Thông tin giấy tờ</h2>
 
-          <input ref={frontInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e)=>{
+          {/* Hidden inputs for gallery */}
+          <input ref={frontFileRef} type="file" accept="image/*" className="hidden" onChange={(e)=>{
             const file = e.target.files?.[0];
-            setImages((p)=>({ ...p, front: file }));
-            setPreview((pv)=>{ if(pv.front) URL.revokeObjectURL(pv.front); return { ...pv, front: file? URL.createObjectURL(file): undefined }; });
+            applySelectedFile("front", file);
           }} />
-          <input ref={backInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e)=>{
+          <input ref={backFileRef} type="file" accept="image/*" className="hidden" onChange={(e)=>{
             const file = e.target.files?.[0];
-            setImages((p)=>({ ...p, back: file }));
-            setPreview((pv)=>{ if(pv.back) URL.revokeObjectURL(pv.back); return { ...pv, back: file? URL.createObjectURL(file): undefined }; });
+            applySelectedFile("back", file);
           }} />
-          <input ref={portraitInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e)=>{
+          <input ref={portraitFileRef} type="file" accept="image/*" className="hidden" onChange={(e)=>{
             const file = e.target.files?.[0];
-            setImages((p)=>({ ...p, portrait: file }));
-            setPreview((pv)=>{ if(pv.portrait) URL.revokeObjectURL(pv.portrait); return { ...pv, portrait: file? URL.createObjectURL(file): undefined }; });
+            applySelectedFile("portrait", file);
           }} />
 
-          <div className="grid grid-cols-3 gap-3">
-            <button type="button" onClick={()=>frontInputRef.current?.click()} className="w-full h-40 rounded-lg overflow-hidden border bg-gray-100">
-              {preview.front && <img src={preview.front} alt="front" className="w-full h-full object-cover" />}
+          {/* Hidden inputs for camera */}
+          <input ref={frontCamRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e)=>{
+            const file = e.target.files?.[0];
+            applySelectedFile("front", file);
+          }} />
+          <input ref={backCamRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e)=>{
+            const file = e.target.files?.[0];
+            applySelectedFile("back", file);
+          }} />
+          <input ref={portraitCamRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e)=>{
+            const file = e.target.files?.[0];
+            applySelectedFile("portrait", file);
+          }} />
+
+          <div className="flex flex-col gap-4">
+            <button type="button" onClick={()=>setPickerFor("front")} className="w-full h-48 rounded-lg overflow-hidden border bg-gray-100">
+              {preview.front ? <img src={preview.front} alt="front" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-500">Ảnh CCCD mặt trước</div>}
             </button>
-            <button type="button" onClick={()=>backInputRef.current?.click()} className="w-full h-40 rounded-lg overflow-hidden border bg-gray-100">
-              {preview.back && <img src={preview.back} alt="back" className="w-full h-full object-cover" />}
+            <button type="button" onClick={()=>setPickerFor("back")} className="w-full h-48 rounded-lg overflow-hidden border bg-gray-100">
+              {preview.back ? <img src={preview.back} alt="back" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-500">Ảnh CCCD mặt sau</div>}
             </button>
-            <button type="button" onClick={()=>portraitInputRef.current?.click()} className="w-full h-40 rounded-lg overflow-hidden border bg-gray-100">
-              {preview.portrait && <img src={preview.portrait} alt="portrait" className="w-full h-full object-cover" />}
+            <button type="button" onClick={()=>setPickerFor("portrait")} className="w-full h-48 rounded-lg overflow-hidden border bg-gray-100">
+              {preview.portrait ? <img src={preview.portrait} alt="portrait" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-500">Ảnh chân dung</div>}
             </button>
           </div>
+
+          {pickerFor && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+              <div className="w-full max-w-sm bg-white rounded-xl shadow p-4 space-y-3">
+                <div className="text-base font-medium">Chọn nguồn ảnh</div>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => {
+                      if (pickerFor === "front") frontCamRef.current?.click();
+                      if (pickerFor === "back") backCamRef.current?.click();
+                      if (pickerFor === "portrait") portraitCamRef.current?.click();
+                      setPickerFor(null);
+                    }}
+                    className="bg-blue-600 text-white py-2 rounded-lg"
+                  >
+                    Chụp ảnh
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (pickerFor === "front") frontFileRef.current?.click();
+                      if (pickerFor === "back") backFileRef.current?.click();
+                      if (pickerFor === "portrait") portraitFileRef.current?.click();
+                      setPickerFor(null);
+                    }}
+                    className="border py-2 rounded-lg"
+                  >
+                    Chọn từ máy
+                  </button>
+                </div>
+                <button onClick={() => setPickerFor(null)} className="w-full border rounded-lg py-2">Huỷ</button>
+              </div>
+            </div>
+          )}
 
           <p className="text-xs text-gray-500">Chọn ảnh, upload sẽ diễn ra khi tạo hồ sơ.</p>
           <div className="flex gap-2">
@@ -308,7 +410,7 @@ export default function ApplyPage() {
             <select className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={String(f.income)} onChange={(e)=>set("income", Number(e.target.value))}>
               <option value={5000000}>Dưới 7 triệu</option>
               <option value={12000000}>Từ 7 triệu đến 15 triệu</option>
-              <option value={20000000}>Từ 15 triệu đ���n 25 triệu</option>
+              <option value={20000000}>Từ 15 triệu đến 25 triệu</option>
               <option value={30000000}>Trên 25 triệu</option>
             </select>
           </label>

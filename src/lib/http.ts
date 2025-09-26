@@ -46,8 +46,11 @@ export async function forwardRaw(
     cache: "no-store",
   });
 
-  const text = await res.text();
-  return new Response(text, { status: res.status, headers: res.headers });
+  // Return raw arrayBuffer to preserve encoding and binary responses
+  const buffer = await res.arrayBuffer();
+  const respHeaders: HeadersInit = {};
+  res.headers.forEach((v, k) => { respHeaders[k] = v; });
+  return new Response(buffer, { status: res.status, headers: respHeaders });
 }
 
 export async function getJSON(path: string, headers?: HeadersInit): Promise<Response> {
