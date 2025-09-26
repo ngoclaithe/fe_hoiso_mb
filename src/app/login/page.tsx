@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { publicApiUrl } from "@/lib/http";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -12,8 +13,10 @@ export default function LoginPage() {
 
   useEffect(() => {
     (async () => {
-      const r = await fetch("/api/auth/profile", { cache: "no-store" });
-      if (r.ok) router.replace("/home");
+      try {
+        const r = await fetch(publicApiUrl("/auth/profile"), { cache: "no-store", credentials: "include" });
+        if (r.ok) router.replace("/home");
+      } catch {}
     })();
   }, [router]);
 
@@ -22,10 +25,11 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/login", {
+      const res = await fetch(publicApiUrl("/auth/login"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
+        credentials: "include",
       });
       if (!res.ok) throw new Error("Đăng nhập thất bại");
       router.replace("/home");
