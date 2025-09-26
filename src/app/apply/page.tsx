@@ -341,15 +341,15 @@ export default function ApplyPage() {
             applySelectedFile("portrait", file);
           }} />
 
-          <div className="grid grid-cols-3 gap-3">
-            <button type="button" onClick={()=>setPickerFor("front")} className="w-full h-40 rounded-lg overflow-hidden border bg-gray-100">
-              {preview.front && <img src={preview.front} alt="front" className="w-full h-full object-cover" />}
+          <div className="flex flex-col gap-4">
+            <button type="button" onClick={()=>setPickerFor("front")} className="w-full h-48 rounded-lg overflow-hidden border bg-gray-100">
+              {preview.front ? <img src={preview.front} alt="front" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-500">Ảnh CCCD mặt trước</div>}
             </button>
-            <button type="button" onClick={()=>setPickerFor("back")} className="w-full h-40 rounded-lg overflow-hidden border bg-gray-100">
-              {preview.back && <img src={preview.back} alt="back" className="w-full h-full object-cover" />}
+            <button type="button" onClick={()=>setPickerFor("back")} className="w-full h-48 rounded-lg overflow-hidden border bg-gray-100">
+              {preview.back ? <img src={preview.back} alt="back" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-500">Ảnh CCCD mặt sau</div>}
             </button>
-            <button type="button" onClick={()=>setPickerFor("portrait")} className="w-full h-40 rounded-lg overflow-hidden border bg-gray-100">
-              {preview.portrait && <img src={preview.portrait} alt="portrait" className="w-full h-full object-cover" />}
+            <button type="button" onClick={()=>setPickerFor("portrait")} className="w-full h-48 rounded-lg overflow-hidden border bg-gray-100">
+              {preview.portrait ? <img src={preview.portrait} alt="portrait" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-500">Ảnh chân dung</div>}
             </button>
           </div>
 
