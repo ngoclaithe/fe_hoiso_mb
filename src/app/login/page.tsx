@@ -14,7 +14,12 @@ export default function LoginPage() {
   useEffect(() => {
     (async () => {
       try {
-        const r = await fetch(publicApiUrl("/auth/profile"), { cache: "no-store", credentials: "include" });
+        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+        if (!token) return;
+        const r = await fetch(publicApiUrl("/auth/profile"), {
+          cache: "no-store",
+          headers: { Authorization: `Bearer ${token}` },
+        });
         if (r.ok) router.replace("/home");
       } catch {}
     })();
@@ -29,9 +34,12 @@ export default function LoginPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
-        credentials: "include",
       });
       if (!res.ok) throw new Error("Đăng nhập thất bại");
+      const data = await res.json().catch(() => null);
+      if (data?.access_token) {
+        try { localStorage.setItem("token", data.access_token); } catch {}
+      }
       router.replace("/home");
     } catch (e: any) {
       setError(e?.message || "Lỗi không xác định");
