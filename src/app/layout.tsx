@@ -28,7 +28,7 @@ export default function RootLayout({
     <html lang="vi">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <div className="min-h-screen flex justify-center bg-[var(--background)] text-[var(--foreground)]">
-          <main className="w-full max-w-[430px] min-h-screen bg-[var(--background)]">
+          <main className="w-full max-w-[430px] min-h-screen bg-gradient-to-b from-white to-blue-50">
             <Header />
 
             {children}
