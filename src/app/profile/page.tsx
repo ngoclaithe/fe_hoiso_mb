@@ -71,18 +71,20 @@ export default function ProfilePage() {
       </div>
 
       <div className="p-4">
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="flex items-center gap-4">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500 to-pink-500 text-white flex items-center justify-center text-2xl font-semibold">{initials}</div>
+        <div className="bg-white p-4 rounded-lg shadow-md border border-gray-100">
+          <div className="flex items-center justify-between">
             <div>
-              <div className="text-sm text-gray-500">Tên đăng nhập</div>
-              <div className="font-medium text-lg">{profile?.username || "-"}</div>
-              <div className="text-sm text-gray-500 mt-2">Email</div>
+              <div className="text-sm text-gray-500">Tài khoản</div>
+              <div className="font-semibold text-xl">{profile?.username || "-"}</div>
+              <div className="text-sm text-gray-500 mt-1">Email</div>
               <div className="font-medium">{profile?.email || "-"}</div>
             </div>
+            <div className="text-right">
+              <div className="text-sm text-gray-500">Số điện thoại</div>
+              <div className="font-medium">{profile?.phone || "-"}</div>
+            </div>
           </div>
-
-          <div className="mt-4">
+          <div className="mt-3">
             {profile?.role !== 'admin' && (
               <Link href="/history" className="inline-block text-center bg-blue-600 text-white py-2 px-3 rounded-lg">Lịch sử hồ sơ vay</Link>
             )}
