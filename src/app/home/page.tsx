@@ -33,14 +33,21 @@ export default function Home() {
   useEffect(() => {
     (async () => {
       try {
-        const r = await fetch(publicApiUrl("/auth/profile"), { cache: "no-store", credentials: "include" });
+        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+        if (!token) { router.replace("/"); return; }
+        const r = await fetch(publicApiUrl("/auth/profile"), {
+          cache: "no-store",
+          headers: { Authorization: `Bearer ${token}` },
+        });
         if (r.ok) {
           const data = await r.json().catch(() => null);
           setProfile(data);
         } else {
+          try { localStorage.removeItem("token"); } catch {}
           router.replace("/");
         }
       } catch {
+        try { localStorage.removeItem("token"); } catch {}
         router.replace("/");
       }
     })();
