@@ -40,6 +40,22 @@ export default function LoginPage() {
       if (data?.access_token) {
         try { localStorage.setItem("token", data.access_token); } catch {}
       }
+
+      // Fetch profile to decide redirect
+      try {
+        const token = data?.access_token || (typeof window !== "undefined" ? localStorage.getItem("token") : null);
+        if (token) {
+          const profileRes = await fetch(publicApiUrl("/auth/profile"), { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" });
+          if (profileRes.ok) {
+            const profile = await profileRes.json().catch(() => null);
+            if (profile?.role === 'admin') {
+              router.replace('/admin/dashboard');
+              return;
+            }
+          }
+        }
+      } catch {}
+
       router.replace("/home");
     } catch (e: any) {
       setError(e?.message || "Lỗi không xác định");
