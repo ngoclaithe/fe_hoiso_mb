@@ -50,8 +50,8 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen p-4 bg-gradient-to-b from-fuchsia-500 via-pink-500 to-rose-500">
-      <div className="mt-10 bg-white/95 backdrop-blur rounded-2xl shadow p-5">
+    <div className="p-4 bg-gradient-to-b from-fuchsia-500 via-pink-500 to-rose-500">
+      <div className="mt-6 bg-white/95 backdrop-blur rounded-2xl shadow p-4 max-w-[420px] mx-auto">
         <div className="text-center mb-4">
           <h1 className="text-2xl font-bold text-gray-900">Đăng ký</h1>
           <p className="text-sm text-gray-600">Tạo tài khoản mới</p>
