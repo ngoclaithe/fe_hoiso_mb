@@ -1,103 +1,117 @@
-import Image from "next/image";
+"use client";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { formatCurrencyVND } from "@/lib/loan";
+
+const firstSlides = [
+  "https://www.anphabe.com/file-deliver.php?key=hcWDxaBjm7TXnZedhtmlrtKWiG3ZcGOgWtaWr1qhqG5mbluboZ1UoKNrZp1aa2dmZ2maVXHXamiXclaUx8vF1tDYwdrHnNaehp7VnZSgU1ehrg",
+  "https://news.mbbank.com.vn/file-service/uploads/v1/images/ee3a94ed-b53c-46e8-89e3-ddd15b0e9449-imagejpg.jpg",
+  "https://statictttc.kinhtedothi.vn/zoom/1000/Uploaded/nguyengiang/2024_11_04/screenshot_2024-09-03_070257_BTOS.jpg",
+];
+
+const secondSlides = [
+  "https://hopdongdientuhanoi.mobifone.vn/wp-content/uploads/2025/04/vay-tien-bang-cccd.jpg",
+  "https://cdn.chanhtuoi.com/uploads/2022/08/vay-tien-chi-can-cmnd-va-bang-lai-01.jpg",
+  "https://simg.zalopay.com.vn/zlp-website/assets/app_vay_tien_online_9_4fe133af9d.jpg",
+];
+
+function maskPhone(phone: string) {
+  if (phone.length < 5) return phone;
+  return phone.slice(0, 3) + "********" + phone.slice(-2);
+}
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [username, setUsername] = useState<string | null>(null);
+  useEffect(() => {
+    try {
+      const u = localStorage.getItem("app.username");
+      setUsername(u);
+    } catch {}
+  }, []);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const activities = useMemo(() => {
+    const phones = [
+      "03312345682",
+      "09876543210",
+      "09011223345",
+      "09155667788",
+      "09733445566",
+      "08566778899",
+      "08244556677",
+      "08812349876",
+      "07099887766",
+      "03955667788",
+    ];
+    const amounts = [
+      100_000_000,
+      50_000_000,
+      200_000_000,
+      80_000_000,
+      150_000_000,
+      120_000_000,
+      90_000_000,
+      60_000_000,
+      110_000_000,
+      75_000_000,
+    ];
+    return phones.map((p, i) => `${maskPhone(p)} đã rút ${formatCurrencyVND(amounts[i])}`);
+  }, []);
+
+  return (
+    <div className="px-4 pb-8">
+      <header className="py-4">
+        {username ? (
+          <h1 className="text-xl font-semibold">Xin chào, {username}</h1>
+        ) : (
+          <div className="flex items-center justify-between gap-3">
+            <h1 className="text-xl font-semibold">Xin chào</h1>
+            <div className="flex gap-2">
+              <Link href="/login" className="px-3 py-1 rounded-full border text-sm">Đăng nhập</Link>
+              <Link href="/register" className="px-3 py-1 rounded-full border text-sm">Đăng ký</Link>
+            </div>
+          </div>
+        )}
+      </header>
+
+      <section aria-label="recent-approvals" className="mb-4">
+        <div className="flex overflow-x-auto gap-3 snap-x snap-mandatory no-scrollbar">
+          {activities.map((a, idx) => (
+            <div key={idx} className="snap-start shrink-0 px-3 py-2 rounded-full border text-xs whitespace-nowrap">
+              {a}
+            </div>
+          ))}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </section>
+
+      <section className="mb-4">
+        <div className="flex overflow-x-auto gap-3 snap-x snap-mandatory no-scrollbar">
+          {firstSlides.map((src, i) => (
+            <div key={i} className="snap-center shrink-0 w-[360px] h-[160px] rounded-lg overflow-hidden border">
+              <img src={src} alt={`slide-${i + 1}`} className="w-full h-full object-cover" />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <div className="mb-4">
+        <Link href="/apply" className="block w-full text-center bg-blue-600 text-white py-3 rounded-lg font-medium">Đăng ký khoản vay</Link>
+      </div>
+
+      <ul className="text-sm space-y-1 mb-4">
+        <li>• Thủ tục vay nhanh chóng, đơn giản</li>
+        <li>• Hạn mức vay lên đến 500 tr VNĐ</li>
+        <li>• Nhận tiền chỉ sau 30 phút làm hồ sơ</li>
+      </ul>
+
+      <section>
+        <div className="flex overflow-x-auto gap-3 snap-x snap-mandatory no-scrollbar">
+          {secondSlides.map((src, i) => (
+            <div key={i} className="snap-center shrink-0 w-[360px] h-[160px] rounded-lg overflow-hidden border">
+              <img src={src} alt={`info-${i + 1}`} className="w-full h-full object-cover" />
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
