@@ -58,7 +58,7 @@ export default function RegisterPage() {
         </div>
         <form onSubmit={submit} className="space-y-2">
           <label className="block text-sm">Tên đăng nhập
-            <input className="mt-1 w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500" value={username} onChange={(e)=>setUsername(e.target.value)} placeholder="username" autoComplete="username" />
+            <input className="mt-1 w-full max-w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500" value={username} onChange={(e)=>setUsername(e.target.value)} placeholder="username" autoComplete="username" />
           </label>
           <label className="block text-sm">Email
             <input className="mt-1 w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500" value={email} onChange={(e)=>setEmail(e.target.value)} placeholder="you@example.com" autoComplete="email" />
@@ -74,7 +74,7 @@ export default function RegisterPage() {
           </label>
           {error && <p className="text-sm text-red-600">{error}</p>}
           <div className="flex justify-center">
-            <button disabled={loading} type="submit" className="w-64 bg-rose-600 text-white py-3 rounded-xl font-medium disabled:opacity-50">{loading?"Đang đăng ký...":"Tạo tài khoản"}</button>
+            <button disabled={loading} type="submit" className="w-64 bg-rose-600 text-white py-3 rounded-xl font-medium disabled:opacity-50">{loading?"Đang đ��ng ký...":"Tạo tài khoản"}</button>
           </div>
         </form>
         <p className="text-sm mt-3 text-center text-gray-700">Đã có tài khoản? <Link href="/login" className="underline font-medium">Đăng nhập</Link></p>
