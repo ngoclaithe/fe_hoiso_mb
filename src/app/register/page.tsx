@@ -1,33 +1,75 @@
 "use client";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function RegisterPage() {
   const router = useRouter();
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function submit(e: React.FormEvent) {
+  useEffect(() => {
+    (async () => {
+      const r = await fetch("/api/auth/profile", { cache: "no-store" });
+      if (r.ok) router.replace("/home");
+    })();
+  }, [router]);
+
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!username.trim()) return;
-    localStorage.setItem("app.username", username.trim());
-    router.replace("/");
+    setError(null);
+    if (password !== confirm) {
+      setError("Xác nhận mật khẩu không khớp");
+      return;
+    }
+    setLoading(true);
+    try {
+      const r = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, email, phone, password, confirmPassword: confirm }),
+      });
+      if (!r.ok) throw new Error("Đăng ký thất bại");
+      await fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username, password }) });
+      router.replace("/home");
+    } catch (e: any) {
+      setError(e?.message || "Lỗi không xác định");
+    } finally { setLoading(false); }
   }
 
   return (
-    <div className="px-4 py-6">
-      <h1 className="text-lg font-semibold mb-4">Đăng ký</h1>
-      <form onSubmit={submit} className="space-y-3">
-        <label className="block text-sm">
-          Tên đăng nhập
-          <input
-            className="mt-1 w-full border rounded-lg px-3 py-2"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Nhập tên của bạn"
-          />
-        </label>
-        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded-lg">Tạo tài khoản</button>
-      </form>
+    <div className="min-h-screen p-4 bg-gradient-to-b from-fuchsia-500 via-pink-500 to-rose-500">
+      <div className="mt-10 bg-white/95 backdrop-blur rounded-2xl shadow p-5">
+        <div className="text-center mb-4">
+          <h1 className="text-2xl font-bold text-gray-900">Đăng ký</h1>
+          <p className="text-sm text-gray-600">Tạo tài khoản mới</p>
+        </div>
+        <form onSubmit={submit} className="space-y-3">
+          <label className="block text-sm">Tên đăng nhập
+            <input className="mt-1 w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500" value={username} onChange={(e)=>setUsername(e.target.value)} placeholder="username" autoComplete="username" />
+          </label>
+          <label className="block text-sm">Email
+            <input className="mt-1 w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500" value={email} onChange={(e)=>setEmail(e.target.value)} placeholder="you@example.com" autoComplete="email" />
+          </label>
+          <label className="block text-sm">Số điện thoại
+            <input className="mt-1 w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500" value={phone} onChange={(e)=>setPhone(e.target.value)} placeholder="09xxxxxxxx" autoComplete="tel" />
+          </label>
+          <label className="block text-sm">Mật khẩu
+            <input type="password" className="mt-1 w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500" value={password} onChange={(e)=>setPassword(e.target.value)} placeholder="••••••" autoComplete="new-password" />
+          </label>
+          <label className="block text-sm">Xác nhận mật khẩu
+            <input type="password" className="mt-1 w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500" value={confirm} onChange={(e)=>setConfirm(e.target.value)} placeholder="••••••" autoComplete="new-password" />
+          </label>
+          {error && <p className="text-sm text-red-600">{error}</p>}
+          <button disabled={loading} type="submit" className="w-full bg-rose-600 text-white py-3 rounded-xl font-medium disabled:opacity-50">{loading?"Đang đăng ký...":"Tạo tài khoản"}</button>
+        </form>
+        <p className="text-sm mt-3 text-center text-gray-700">Đã có tài khoản? <Link href="/login" className="underline font-medium">Đăng nhập</Link></p>
+      </div>
     </div>
   );
 }
