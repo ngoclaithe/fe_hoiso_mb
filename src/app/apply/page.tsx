@@ -197,9 +197,15 @@ export default function ApplyPage() {
         monthlyPaymentDate: Number(f.monthlyPaymentDate),
       };
 
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      try {
+        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+      } catch {}
+
       const res = await fetch("/api/loans", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify(payload),
       });
 
