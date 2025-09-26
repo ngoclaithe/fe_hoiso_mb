@@ -17,7 +17,12 @@ export default function RegisterPage() {
   useEffect(() => {
     (async () => {
       try {
-        const r = await fetch(publicApiUrl("/auth/profile"), { cache: "no-store", credentials: "include" });
+        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+        if (!token) return;
+        const r = await fetch(publicApiUrl("/auth/profile"), {
+          cache: "no-store",
+          headers: { Authorization: `Bearer ${token}` },
+        });
         if (r.ok) router.replace("/home");
       } catch {}
     })();
