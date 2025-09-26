@@ -292,7 +292,7 @@ export default function ApplyPage() {
 
           <p className="text-xs text-gray-500">Chọn ảnh, upload sẽ diễn ra khi tạo hồ sơ.</p>
           <div className="flex gap-2">
-            <button onClick={()=> (step===1? router.replace("/home"): prev())} className="flex-1 border rounded-lg py-2">Trở lại</button>
+            <button onClick={prev} className="flex-1 border rounded-lg py-2">Trở lại</button>
             <button onClick={next} className="flex-1 bg-blue-600 text-white rounded-lg py-2">Tiếp tục</button>
           </div>
         </section>
