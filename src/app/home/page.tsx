@@ -83,12 +83,14 @@ export default function Home() {
 
   const [firstIdx, setFirstIdx] = useState(0);
   const [secondIdx, setSecondIdx] = useState(0);
+  const [activityIdx, setActivityIdx] = useState(0);
 
   useEffect(() => {
     const t1 = setInterval(() => setFirstIdx((i) => (i + 1) % firstSlides.length), 10000);
     const t2 = setInterval(() => setSecondIdx((i) => (i + 1) % secondSlides.length), 10000);
-    return () => { clearInterval(t1); clearInterval(t2); };
-  }, []);
+    const t3 = setInterval(() => setActivityIdx((i) => (i + 1) % activities.length), 3000);
+    return () => { clearInterval(t1); clearInterval(t2); clearInterval(t3); };
+  }, [activities.length]);
 
   return (
     <div className="px-4 pb-8">
@@ -97,12 +99,10 @@ export default function Home() {
       </header>
 
       <section aria-label="recent-approvals" className="mb-4">
-        <div className="flex overflow-x-auto gap-3 snap-x snap-mandatory no-scrollbar">
-          {activities.map((a, idx) => (
-            <div key={idx} className="snap-start shrink-0 px-3 py-2 rounded-full border text-xs whitespace-nowrap">
-              {a}
-            </div>
-          ))}
+        <div className="flex justify-center">
+          <div className="px-3 py-2 rounded-full border text-xs whitespace-nowrap">
+            {activities[activityIdx]}
+          </div>
         </div>
       </section>
 
@@ -118,6 +118,16 @@ export default function Home() {
               </div>
             ))}
           </div>
+        </div>
+        <div className="flex justify-center gap-2 mt-2">
+          {firstSlides.map((_, i) => (
+            <button
+              key={i}
+              aria-label={`Chuyển slide ${i + 1}`}
+              className={`w-2.5 h-2.5 rounded-full ${i === firstIdx ? "bg-blue-600" : "bg-gray-300"}`}
+              onClick={() => setFirstIdx(i)}
+            />
+          ))}
         </div>
       </section>
 
@@ -143,6 +153,16 @@ export default function Home() {
               </div>
             ))}
           </div>
+        </div>
+        <div className="flex justify-center gap-2 mt-2">
+          {secondSlides.map((_, i) => (
+            <button
+              key={i}
+              aria-label={`Chuyển ảnh ${i + 1}`}
+              className={`w-2.5 h-2.5 rounded-full ${i === secondIdx ? "bg-blue-600" : "bg-gray-300"}`}
+              onClick={() => setSecondIdx(i)}
+            />
+          ))}
         </div>
       </section>
     </div>
