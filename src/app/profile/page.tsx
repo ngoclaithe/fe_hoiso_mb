@@ -89,30 +89,49 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Latest loan personal info */}
+        {/* Latest loan personal info styled */}
         <div className="mt-4">
-          <h2 className="text-lg font-semibold mb-2">Thông tin hồ sơ gần nhất</h2>
           {loadingLoan && <div className="p-3 bg-white rounded-lg">Đang tải...</div>}
           {!loadingLoan && !latestLoan && <div className="p-3 bg-white rounded-lg">Không có hồ sơ</div>}
+
           {!loadingLoan && latestLoan && (
-            <div className="p-4 bg-blue-50 rounded-lg shadow">
-              <div className="grid grid-cols-1 gap-2 text-sm text-gray-700">
-                <div><span className="text-gray-500">Họ và tên: </span><span className="font-medium">{latestLoan.fullName || '-'}</span></div>
-                <div><span className="text-gray-500">Ngày sinh: </span><span className="font-medium">{latestLoan.dateOfBirth ? new Date(latestLoan.dateOfBirth).toLocaleDateString() : '-'}</span></div>
-                <div><span className="text-gray-500">Giới tính: </span><span className="font-medium">{genderLabel(latestLoan.gender)}</span></div>
-                <div><span className="text-gray-500">Nơi ở hiện nay: </span><span className="font-medium">{latestLoan.currentAddress || '-'}</span></div>
-                <div><span className="text-gray-500">Địa chỉ thường trú: </span><span className="font-medium">{latestLoan.permanentAddress || '-'}</span></div>
-                <div><span className="text-gray-500">Quê quán: </span><span className="font-medium">{latestLoan.hometown || '-'}</span></div>
-                <div><span className="text-gray-500">Nghề nghiệp: </span><span className="font-medium">{latestLoan.occupation || '-'}</span></div>
-                <div><span className="text-gray-500">Thu nhập: </span><span className="font-medium">{latestLoan.income || '-'}</span></div>
-                <div><span className="text-gray-500">Số điện thoại liên hệ 1: </span><span className="font-medium">{latestLoan.contact1Phone || '-'}</span></div>
-                <div><span className="text-gray-500">Quan hệ 1: </span><span className="font-medium">{latestLoan.contact1Relationship || '-'}</span></div>
-                <div><span className="text-gray-500">Số điện thoại liên hệ 2: </span><span className="font-medium">{latestLoan.contact2Phone || '-'}</span></div>
-                <div><span className="text-gray-500">Quan hệ 2: </span><span className="font-medium">{latestLoan.contact2Relationship || '-'}</span></div>
-                <div><span className="text-gray-500">Ngân hàng thụ hưởng: </span><span className="font-medium">{latestLoan.bankName || '-'}</span></div>
-                <div><span className="text-gray-500">Số tài khoản: </span><span className="font-medium">{latestLoan.bankAccountNumber || '-'}</span></div>
-                <div><span className="text-gray-500">Tên thụ hưởng: </span><span className="font-medium">{latestLoan.accountHolderName || '-'}</span></div>
-                <div><span className="text-gray-500">Mục đích vay: </span><span className="font-medium">{latestLoan.loanPurpose || '-'}</span></div>
+            <div className="grid grid-cols-1 gap-3">
+              {/* Personal info card */}
+              <div className="p-4 bg-white rounded-lg shadow-md">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-pink-500 text-white flex items-center justify-center text-xl font-semibold">{initials}</div>
+                  <div>
+                    <div className="text-sm text-gray-500">Họ và tên</div>
+                    <div className="font-medium text-lg">{latestLoan.fullName || '-'}</div>
+                    <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-gray-600">
+                      <div>Ngày sinh: <span className="font-medium text-gray-800">{latestLoan.dateOfBirth ? new Date(latestLoan.dateOfBirth).toLocaleDateString() : '-'}</span></div>
+                      <div>Giới tính: <span className="font-medium text-gray-800">{genderLabel(latestLoan.gender)}</span></div>
+                      <div className="col-span-2">Nghề nghiệp: <span className="font-medium text-gray-800">{latestLoan.occupation || '-'}</span></div>
+                      <div>Thu nhập: <span className="font-medium text-gray-800">{latestLoan.income || '-'}</span></div>
+                      <div>Quê quán: <span className="font-medium text-gray-800">{latestLoan.hometown || '-'}</span></div>
+                      <div className="col-span-2">Nơi ở hiện nay: <span className="font-medium text-gray-800">{latestLoan.currentAddress || '-'}</span></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-gray-700">
+                  <div>Liên hệ 1: <div className="font-medium">{latestLoan.contact1Phone || '-'}</div></div>
+                  <div>Quan hệ 1: <div className="font-medium">{latestLoan.contact1Relationship || '-'}</div></div>
+                  <div>Liên hệ 2: <div className="font-medium">{latestLoan.contact2Phone || '-'}</div></div>
+                  <div>Quan hệ 2: <div className="font-medium">{latestLoan.contact2Relationship || '-'}</div></div>
+                </div>
+              </div>
+
+              {/* Bank info card separate */}
+              <div className="p-4 bg-indigo-50 border border-indigo-100 rounded-lg">
+                <div className="text-sm text-indigo-700">Ngân hàng thụ hưởng</div>
+                <div className="mt-2 grid grid-cols-1 gap-2 text-gray-800">
+                  <div className="font-medium">{latestLoan.bankName || '-'}</div>
+                  <div className="text-sm text-gray-500">Số tài khoản</div>
+                  <div className="font-medium">{latestLoan.bankAccountNumber || '-'}</div>
+                  <div className="text-sm text-gray-500">Tên thụ hưởng</div>
+                  <div className="font-medium">{latestLoan.accountHolderName || '-'}</div>
+                </div>
               </div>
             </div>
           )}
