@@ -20,8 +20,7 @@ export default function ProfilePage() {
   }, []);
 
   const initials = profile?.username ? profile.username.slice(0,2).toUpperCase() : "U";
-
-import { useRouter } from "next/navigation";
+  const router = useRouter();
 
   return (
     <div>
