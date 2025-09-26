@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { formatCurrencyVND } from "@/lib/loan";
 import { useRouter } from "next/navigation";
+import { publicApiUrl } from "@/lib/http";
 
 const firstSlides = [
   "https://www.anphabe.com/file-deliver.php?key=hcWDxaBjm7TXnZedhtmlrtKWiG3ZcGOgWtaWr1qhqG5mbluboZ1UoKNrZp1aa2dmZ2maVXHXamiXclaUx8vF1tDYwdrHnNaehp7VnZSgU1ehrg",
@@ -31,11 +32,15 @@ export default function Home() {
 
   useEffect(() => {
     (async () => {
-      const r = await fetch("/api/auth/profile", { cache: "no-store" });
-      if (r.ok) {
-        const data = await r.json().catch(()=>null);
-        setProfile(data);
-      } else {
+      try {
+        const r = await fetch(publicApiUrl("/auth/profile"), { cache: "no-store", credentials: "include" });
+        if (r.ok) {
+          const data = await r.json().catch(() => null);
+          setProfile(data);
+        } else {
+          router.replace("/");
+        }
+      } catch {
         router.replace("/");
       }
     })();
@@ -69,6 +74,15 @@ export default function Home() {
     return phones.map((p, i) => `${maskPhone(p)} đã rút ${formatCurrencyVND(amounts[i])}`);
   }, []);
 
+  const [firstIdx, setFirstIdx] = useState(0);
+  const [secondIdx, setSecondIdx] = useState(0);
+
+  useEffect(() => {
+    const t1 = setInterval(() => setFirstIdx((i) => (i + 1) % firstSlides.length), 10000);
+    const t2 = setInterval(() => setSecondIdx((i) => (i + 1) % secondSlides.length), 10000);
+    return () => { clearInterval(t1); clearInterval(t2); };
+  }, []);
+
   return (
     <div className="px-4 pb-8">
       <header className="py-4">
@@ -86,12 +100,17 @@ export default function Home() {
       </section>
 
       <section className="mb-4">
-        <div className="flex overflow-x-auto gap-3 snap-x snap-mandatory no-scrollbar">
-          {firstSlides.map((src, i) => (
-            <div key={i} className="snap-center shrink-0 w-[360px] h-[160px] rounded-lg overflow-hidden border">
-              <img src={src} alt={`slide-${i + 1}`} className="w-full h-full object-cover" />
-            </div>
-          ))}
+        <div className="relative w-[360px] h-[160px] rounded-lg overflow-hidden border mx-auto">
+          <div
+            className="flex h-full transition-transform duration-700 ease-out"
+            style={{ transform: `translateX(-${firstIdx * 100}%)` }}
+          >
+            {firstSlides.map((src, i) => (
+              <div key={i} className="min-w-full h-full">
+                <img src={src} alt={`slide-${i + 1}`} className="w-full h-full object-cover" />
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -106,12 +125,17 @@ export default function Home() {
       </ul>
 
       <section>
-        <div className="flex overflow-x-auto gap-3 snap-x snap-mandatory no-scrollbar">
-          {secondSlides.map((src, i) => (
-            <div key={i} className="snap-center shrink-0 w-[360px] h-[160px] rounded-lg overflow-hidden border">
-              <img src={src} alt={`info-${i + 1}`} className="w-full h-full object-cover" />
-            </div>
-          ))}
+        <div className="relative w-[360px] h-[160px] rounded-lg overflow-hidden border mx-auto">
+          <div
+            className="flex h-full transition-transform duration-700 ease-out"
+            style={{ transform: `translateX(-${secondIdx * 100}%)` }}
+          >
+            {secondSlides.map((src, i) => (
+              <div key={i} className="min-w-full h-full">
+                <img src={src} alt={`info-${i + 1}`} className="w-full h-full object-cover" />
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </div>
