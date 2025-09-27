@@ -81,11 +81,6 @@ export default function Header() {
                 <Link href="/admin/dashboard" className="px-3 py-1 rounded-md bg-yellow-100 text-yellow-800 text-sm">Admin</Link>
               )}
 
-              <div className="relative">
-                <Link href="/profile" className="inline-flex items-center gap-2 p-1 rounded-md hover:bg-blue-500/20">
-                  <div className="w-9 h-9 rounded-full bg-white text-blue-600 flex items-center justify-center font-medium">{initials}</div>
-                </Link>
-              </div>
             </>
           )}
         </div>
