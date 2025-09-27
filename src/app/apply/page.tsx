@@ -60,8 +60,8 @@ export default function ApplyPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [images, setImages] = useState<{front?: File; back?: File; portrait?: File}>({});
-  const [preview, setPreview] = useState<{front?: string; back?: string; portrait?: string}>({});
+  const [images, setImages] = useState<{front?: File; back?: File; portrait?: File; signature?: File}>({});
+  const [preview, setPreview] = useState<{front?: string; back?: string; portrait?: string; signature?: string}>({});
   const [pickerFor, setPickerFor] = useState<DocSlot | null>(null);
 
   // Gallery inputs
@@ -77,7 +77,6 @@ export default function ApplyPage() {
   const signatureCanvasRef = useRef<HTMLCanvasElement>(null);
   const [signing, setSigning] = useState(false);
   const signatureDrawnRef = useRef(false);
-  const [signatureUploading, setSignatureUploading] = useState(false);
 
   function getCanvasCtx() {
     const c = signatureCanvasRef.current;
@@ -147,37 +146,6 @@ export default function ApplyPage() {
     set("personalSignatureUrl", "");
   }
 
-  async function uploadSignature() {
-    if (!signatureDrawnRef.current) {
-      alert("Vui lòng ký trước khi tải lên");
-      return;
-    }
-    const c = signatureCanvasRef.current;
-    if (!c) return;
-    setSignatureUploading(true);
-    try {
-      const blob: Blob = await new Promise((resolve, reject) => {
-        c.toBlob((b) => (b ? resolve(b) : reject(new Error("Không tạo được ảnh"))), "image/png");
-      });
-      const file = new File([blob], "signature.png", { type: "image/png" });
-
-      const sigRes = await fetch("/api/signature", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ resource_type: "image" }),
-        cache: "no-store",
-      });
-      if (!sigRes.ok) throw new Error("Không lấy được chữ ký Cloudinary");
-      const sig: Signature = await sigRes.json();
-      const url = await uploadToCloudinary(file, sig, "image");
-      set("personalSignatureUrl", url);
-    } catch (e: any) {
-      const msg = e?.message || "Tải chữ ký thất bại";
-      alert(msg);
-    } finally {
-      setSignatureUploading(false);
-    }
-  }
 
   const [f, setF] = useState<LoanForm>({
     loanAmount: 20_000_000,
@@ -273,7 +241,15 @@ export default function ApplyPage() {
       let citizenIdBackUrl: string | undefined;
       let portraitUrl: string | undefined;
 
-      if (images.front || images.back || images.portrait) {
+      // Prepare signature file if drawn on canvas
+      let signatureFile: File | undefined;
+      if (signatureDrawnRef.current && signatureCanvasRef.current) {
+        const c = signatureCanvasRef.current;
+        const blob: Blob | null = await new Promise((resolve) => c.toBlob((b) => resolve(b), "image/png"));
+        if (blob) signatureFile = new File([blob], "signature.png", { type: "image/png" });
+      }
+
+      if (images.front || images.back || images.portrait || signatureFile) {
         const options = { resource_type: "image" };
         const sigRes = await fetch("/api/signature", {
           method: "POST",
@@ -287,6 +263,10 @@ export default function ApplyPage() {
         if (images.front) citizenIdFrontUrl = await uploadToCloudinary(images.front, sig, "image");
         if (images.back) citizenIdBackUrl = await uploadToCloudinary(images.back, sig, "image");
         if (images.portrait) portraitUrl = await uploadToCloudinary(images.portrait, sig, "image");
+        if (signatureFile) {
+          const url = await uploadToCloudinary(signatureFile, sig, "image");
+          set("personalSignatureUrl", url);
+        }
       }
 
       const payload = {
@@ -366,7 +346,7 @@ export default function ApplyPage() {
               className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </label>
           <label className="block text-sm">
-            Thời hạn vay
+            Th��i hạn vay
             <select
               className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={f.loanTermMonths}
@@ -392,7 +372,7 @@ export default function ApplyPage() {
               <div className="font-medium">{formatCurrencyVND(firstInstallment)}</div>
             </div>
             <div className="rounded-lg border p-3">
-              <div className="text-gray-600">Lãi suất hàng tháng</div>
+              <div className="text-gray-600">Lãi suất hàng th��ng</div>
               <div className="font-medium">{f.interestRate}%</div>
             </div>
           </div>
@@ -603,7 +583,6 @@ export default function ApplyPage() {
             </div>
             <div className="flex gap-2">
               <button type="button" onClick={clearSignature} className="flex-1 border rounded-lg py-2">Xoá</button>
-              <button type="button" disabled={signatureUploading} onClick={uploadSignature} className="flex-1 bg-blue-600 text-white rounded-lg py-2 disabled:opacity-50">{signatureUploading?"Đang tải...":"Tải chữ ký"}</button>
             </div>
             {f.personalSignatureUrl ? (
               <div className="rounded-lg border p-2">
