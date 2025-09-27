@@ -87,16 +87,6 @@ export default function PersonalInfoPage() {
               </div>
             </div>
 
-            <div className="p-4 bg-indigo-50 border border-indigo-100 rounded-lg">
-              <div className="text-sm text-indigo-700">Ngân hàng thụ hưởng</div>
-              <div className="mt-2 grid grid-cols-1 gap-2 text-gray-800">
-                <div className="font-medium">{latestLoan.bankName || '-'}</div>
-                <div className="text-sm text-gray-500">Số tài khoản</div>
-                <div className="font-medium">{latestLoan.bankAccountNumber || '-'}</div>
-                <div className="text-sm text-gray-500">Tên thụ hưởng</div>
-                <div className="font-medium">{latestLoan.accountHolderName || '-'}</div>
-              </div>
-            </div>
           </div>
         )}
       </div>
