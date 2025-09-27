@@ -1,12 +1,13 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function BottomNav() {
   const pathname = usePathname();
-  const [show, setShow] = React.useState(false);
+  const [show, setShow] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     try {
       const t = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
       setShow(!!t);
