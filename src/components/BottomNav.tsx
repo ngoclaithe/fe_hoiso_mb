@@ -5,7 +5,11 @@ import { usePathname } from "next/navigation";
 export default function BottomNav() {
   const pathname = usePathname();
 
-  const isActive = (href: string) => (pathname === href);
+  const isActive = (href: string) => {
+    if (!pathname) return false;
+    if (href === "/home") return pathname === "/home" || pathname === "/";
+    return pathname === href || pathname.startsWith(href + "/");
+  };
 
   const baseItem = "flex flex-col items-center justify-center flex-1 py-2 text-xs";
   const activeCls = "text-blue-600";
