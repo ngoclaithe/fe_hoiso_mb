@@ -11,33 +11,8 @@ interface UserProfile {
   role: string;
 }
 
-// Define interface for loan data
-interface LoanData {
-  fullName?: string;
-  dateOfBirth?: string;
-  gender?: string;
-  occupation?: string;
-  income?: string;
-  hometown?: string;
-  currentAddress?: string;
-  contact1Phone?: string;
-  contact1Relationship?: string;
-  contact2Phone?: string;
-  contact2Relationship?: string;
-  bankName?: string;
-  bankAccountNumber?: string;
-  accountHolderName?: string;
-}
-
-// Define interface for loans API response
-interface LoansApiResponse {
-  data?: LoanData[];
-}
-
 export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [latestLoan, setLatestLoan] = useState<LoanData | null>(null);
-  const [loadingLoan, setLoadingLoan] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -56,45 +31,10 @@ export default function ProfilePage() {
     })();
   }, []);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-        if (!token) return;
-        setLoadingLoan(true);
-        const res = await fetch("/api/my-loans", { 
-          cache: "no-store", 
-          headers: { Authorization: `Bearer ${token}` } 
-        });
-        if (!res.ok) return;
-        const data: LoanData[] | LoansApiResponse = await res.json().catch(() => null);
-        // Accept either array or { data: [...] }
-        const arr = Array.isArray(data) ? data : (data?.data || []);
-        if (arr && arr.length > 0) {
-          setLatestLoan(arr[0]);
-        }
-      } catch {
-        // Handle error silently - removed unused parameter
-      } finally { 
-        setLoadingLoan(false); 
-      }
-    })();
-  }, []);
-
   function logout() {
     try { localStorage.removeItem("token"); } catch {}
     router.push('/login');
   }
-
-  function genderLabel(g?: string) {
-    if (!g) return '-';
-    const s = String(g).toLowerCase();
-    if (s === 'male' || s === 'm') return 'Nam';
-    if (s === 'female' || s === 'f') return 'Nữ';
-    return 'Khác';
-  }
-
-  // Removed unused 'initials' variable
 
   return (
     <div>
