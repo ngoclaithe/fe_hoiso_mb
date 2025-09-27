@@ -51,7 +51,12 @@ export default function PersonalInfoPage() {
 
   return (
     <div>
-      <div className="bg-blue-600 text-white px-4 py-3">
+      <div className="bg-blue-600 text-white px-4 py-3 relative">
+        <button onClick={() => router.push('/profile')} aria-label="Quay lại" className="absolute left-3 top-1/2 -translate-y-1/2 p-2 text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
         <div className="font-semibold text-center">Thông tin cá nhân</div>
       </div>
 
@@ -119,18 +124,11 @@ export default function PersonalInfoPage() {
               </div>
 
               <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <button onClick={() => router.push('/profile')} className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg">Quay lại</button>
                 <button className="w-full px-4 py-3 border border-gray-200 rounded-lg">Chỉnh sửa thông tin</button>
+                <button className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-left" onClick={() => window.alert('Mô phỏng: đổi mật khẩu')}>Đổi mật khẩu</button>
               </div>
             </div>
 
-            {/* Quick actions card */}
-            <div className="bg-white rounded-lg shadow-md border border-gray-100 p-4">
-              <div className="text-sm text-gray-500">Hành động nhanh</div>
-              <div className="mt-3 space-y-2">
-                <button className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-left">Đổi mật khẩu</button>
-              </div>
-            </div>
           </div>
         )}
       </div>
