@@ -14,9 +14,6 @@ interface LoanData {
   contact1Relationship?: string;
   contact2Phone?: string;
   contact2Relationship?: string;
-  bankName?: string;
-  bankAccountNumber?: string;
-  accountHolderName?: string;
 }
 
 interface LoansApiResponse { data?: LoanData[] }
@@ -54,9 +51,13 @@ export default function PersonalInfoPage() {
 
   return (
     <div>
-      <div className="bg-blue-600 text-white px-4 py-3 flex items-center gap-3">
-        <button onClick={() => router.back()} className="text-white">&lt;</button>
-        <div className="font-semibold">Thông tin cá nhân</div>
+      <div className="bg-blue-600 text-white px-4 py-3 relative">
+        <button onClick={() => router.push('/profile')} aria-label="Quay lại" className="absolute left-3 top-1/2 -translate-y-1/2 p-2 text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <div className="font-semibold text-center">Thông tin cá nhân</div>
       </div>
 
       <div className="p-4">
@@ -64,39 +65,63 @@ export default function PersonalInfoPage() {
         {!loading && !latestLoan && <div className="p-3 bg-white rounded-lg">Không có hồ sơ</div>}
 
         {!loading && latestLoan && (
-          <div className="grid grid-cols-1 gap-3">
-            <div className="p-4 bg-gradient-to-r from-blue-50 to-white border-l-4 border-blue-300 rounded-lg shadow-sm">
-              <div>
-                <div className="text-sm text-gray-500">Họ và tên</div>
-                <div className="font-medium text-lg">{latestLoan.fullName || '-'}</div>
-                <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-gray-600">
-                  <div>Ngày sinh: <span className="font-medium text-gray-800">{latestLoan.dateOfBirth ? new Date(latestLoan.dateOfBirth).toLocaleDateString() : '-'}</span></div>
-                  <div>Giới tính: <span className="font-medium text-gray-800">{genderLabel(latestLoan.gender)}</span></div>
-                  <div className="col-span-2">Nghề nghiệp: <span className="font-medium text-gray-800">{latestLoan.occupation || '-'}</span></div>
-                  <div>Thu nhập: <span className="font-medium text-gray-800">{latestLoan.income || '-'}</span></div>
-                  <div>Quê quán: <span className="font-medium text-gray-800">{latestLoan.hometown || '-'}</span></div>
-                  <div className="col-span-2">Nơi ở hiện nay: <span className="font-medium text-gray-800">{latestLoan.currentAddress || '-'}</span></div>
+          <div className="space-y-4">
+            {/* Main profile card */}
+            <div className="bg-white rounded-lg shadow-md border border-gray-100 p-4">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center text-blue-700 font-semibold text-lg">{(latestLoan.fullName||"-").slice(0,2).toUpperCase()}</div>
+                <div className="flex-1">
+                  <div className="text-sm text-gray-500">Họ và tên</div>
+                  <div className="font-semibold text-lg text-gray-800">{latestLoan.fullName || '-'}</div>
+                  <div className="text-sm text-gray-500 mt-1">{latestLoan.occupation || ''}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-xs text-gray-500">Giới tính</div>
+                  <div className="font-medium text-gray-800">{genderLabel(latestLoan.gender)}</div>
                 </div>
               </div>
 
               <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-gray-700">
-                <div>Liên hệ 1: <div className="font-medium">{latestLoan.contact1Phone || '-'}</div></div>
-                <div>Quan hệ 1: <div className="font-medium">{latestLoan.contact1Relationship || '-'}</div></div>
-                <div>Liên hệ 2: <div className="font-medium">{latestLoan.contact2Phone || '-'}</div></div>
-                <div>Quan hệ 2: <div className="font-medium">{latestLoan.contact2Relationship || '-'}</div></div>
+                <div>
+                  <div className="text-xs text-gray-500">Ngày sinh</div>
+                  <div className="font-medium text-gray-800">{latestLoan.dateOfBirth ? new Date(latestLoan.dateOfBirth).toLocaleDateString() : '-'}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-gray-500">Thu nhập</div>
+                  <div className="font-medium text-gray-800">{latestLoan.income || '-'}</div>
+                </div>
+
+                <div>
+                  <div className="text-xs text-gray-500">Quê quán</div>
+                  <div className="font-medium text-gray-800">{latestLoan.hometown || '-'}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-gray-500">Nơi ở hiện nay</div>
+                  <div className="font-medium text-gray-800">{latestLoan.currentAddress || '-'}</div>
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <div className="text-sm text-gray-500">Thông tin liên hệ người thân</div>
+                <div className="mt-2 space-y-2">
+                  <div className="p-3 bg-gray-50 rounded-md">
+                    <div className="text-xs text-gray-500">Người liên hệ 1 • {latestLoan.contact1Relationship || '-'}</div>
+                    <div className="font-medium text-gray-800">{latestLoan.contact1Phone || '-'}</div>
+                  </div>
+
+                  <div className="p-3 bg-gray-50 rounded-md">
+                    <div className="text-xs text-gray-500">Người liên hệ 2 • {latestLoan.contact2Relationship || '-'}</div>
+                    <div className="font-medium text-gray-800">{latestLoan.contact2Phone || '-'}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button className="w-full px-4 py-3 border border-gray-200 rounded-lg">Chỉnh sửa thông tin</button>
+                <button className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-left" onClick={() => window.alert('Mô phỏng: đổi mật khẩu')}>Đổi mật khẩu</button>
               </div>
             </div>
 
-            <div className="p-4 bg-indigo-50 border border-indigo-100 rounded-lg">
-              <div className="text-sm text-indigo-700">Ngân hàng thụ hưởng</div>
-              <div className="mt-2 grid grid-cols-1 gap-2 text-gray-800">
-                <div className="font-medium">{latestLoan.bankName || '-'}</div>
-                <div className="text-sm text-gray-500">Số tài khoản</div>
-                <div className="font-medium">{latestLoan.bankAccountNumber || '-'}</div>
-                <div className="text-sm text-gray-500">Tên thụ hưởng</div>
-                <div className="font-medium">{latestLoan.accountHolderName || '-'}</div>
-              </div>
-            </div>
           </div>
         )}
       </div>

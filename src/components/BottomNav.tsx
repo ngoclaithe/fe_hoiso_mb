@@ -31,7 +31,7 @@ export default function BottomNav() {
   return (
     <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white border-t border-gray-200 shadow-sm z-40">
       <div className="flex">
-        <Link href="/apply" className={`${baseItem} ${isActive("/apply") ? activeCls : inactiveCls}`} aria-label="Ví tiền">
+        <Link href="/wallet" className={`${baseItem} ${isActive("/wallet") ? activeCls : inactiveCls}`} aria-label="Ví tiền">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
             <path d="M21 7H5a2 2 0 0 0-2 2v8a3 3 0 0 0 3 3h15V7Zm0-2V3H6a3 3 0 0 0-3 3v1a3 3 0 0 1 3-3h15Z" />
             <path d="M17 13h2a1 1 0 1 1 0 2h-2a1 1 0 0 1 0-2Z" />
