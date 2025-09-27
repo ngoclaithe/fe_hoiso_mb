@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState, useRef } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import { calcMonthlyInstallment, formatCurrencyVND, Gender, VN_BANKS, todayISO } from "@/lib/loan";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -29,6 +29,7 @@ type LoanForm = {
   citizenIdFrontUrl?: string;
   citizenIdBackUrl?: string;
   portraitUrl?: string;
+  personalSignatureUrl?: string;
 };
 
 type DocSlot = "front" | "back" | "portrait";
@@ -71,6 +72,112 @@ export default function ApplyPage() {
   const frontCamRef = useRef<HTMLInputElement>(null);
   const backCamRef = useRef<HTMLInputElement>(null);
   const portraitCamRef = useRef<HTMLInputElement>(null);
+
+  // Signature capture
+  const signatureCanvasRef = useRef<HTMLCanvasElement>(null);
+  const [signing, setSigning] = useState(false);
+  const signatureDrawnRef = useRef(false);
+  const [signatureUploading, setSignatureUploading] = useState(false);
+
+  function getCanvasCtx() {
+    const c = signatureCanvasRef.current;
+    if (!c) return null;
+    return c.getContext("2d");
+  }
+
+  function resizeSignatureCanvas() {
+    const c = signatureCanvasRef.current;
+    if (!c) return;
+    const ratio = window.devicePixelRatio || 1;
+    const displayWidth = c.clientWidth || 0;
+    const displayHeight = c.clientHeight || 0;
+    if (displayWidth === 0 || displayHeight === 0) return;
+    c.width = Math.floor(displayWidth * ratio);
+    c.height = Math.floor(displayHeight * ratio);
+    const ctx = c.getContext("2d");
+    if (ctx) ctx.scale(ratio, ratio);
+  }
+
+  useEffect(() => {
+    resizeSignatureCanvas();
+    const onResize = () => resizeSignatureCanvas();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  function onSignaturePointerDown(e: any) {
+    const ctx = getCanvasCtx();
+    if (!ctx) return;
+    setSigning(true);
+    signatureDrawnRef.current = true;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#111827"; // gray-900
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    try { e.currentTarget.setPointerCapture(e.pointerId); } catch {}
+  }
+
+  function onSignaturePointerMove(e: any) {
+    if (!signing) return;
+    const ctx = getCanvasCtx();
+    if (!ctx) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  }
+
+  function onSignaturePointerUp(e: any) {
+    setSigning(false);
+    try { e.currentTarget.releasePointerCapture(e.pointerId); } catch {}
+  }
+
+  function clearSignature() {
+    const c = signatureCanvasRef.current;
+    const ctx = getCanvasCtx();
+    if (c && ctx) {
+      ctx.clearRect(0, 0, c.width, c.height);
+    }
+    signatureDrawnRef.current = false;
+    set("personalSignatureUrl", "");
+  }
+
+  async function uploadSignature() {
+    if (!signatureDrawnRef.current) {
+      alert("Vui lòng ký trước khi tải lên");
+      return;
+    }
+    const c = signatureCanvasRef.current;
+    if (!c) return;
+    setSignatureUploading(true);
+    try {
+      const blob: Blob = await new Promise((resolve, reject) => {
+        c.toBlob((b) => (b ? resolve(b) : reject(new Error("Không tạo được ảnh"))), "image/png");
+      });
+      const file = new File([blob], "signature.png", { type: "image/png" });
+
+      const sigRes = await fetch("/api/signature", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ resource_type: "image" }),
+        cache: "no-store",
+      });
+      if (!sigRes.ok) throw new Error("Không lấy được chữ ký Cloudinary");
+      const sig: Signature = await sigRes.json();
+      const url = await uploadToCloudinary(file, sig, "image");
+      set("personalSignatureUrl", url);
+    } catch (e: any) {
+      const msg = e?.message || "Tải chữ ký thất bại";
+      alert(msg);
+    } finally {
+      setSignatureUploading(false);
+    }
+  }
 
   const [f, setF] = useState<LoanForm>({
     loanAmount: 20_000_000,
@@ -207,6 +314,7 @@ export default function ApplyPage() {
         loanTermMonths: Number(f.loanTermMonths),
         interestRate: Number(f.interestRate),
         monthlyPaymentDate: Number(f.monthlyPaymentDate),
+        personalSignatureUrl: f.personalSignatureUrl,
       };
 
       const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -480,6 +588,31 @@ export default function ApplyPage() {
               ))}
             </select>
           </label>
+
+          <div className="space-y-2">
+            <div className="text-sm font-medium">Chữ ký cá nhân</div>
+            <div className="rounded-lg border bg-gray-50">
+              <canvas
+                ref={signatureCanvasRef}
+                className="w-full h-40 rounded-lg"
+                onPointerDown={onSignaturePointerDown}
+                onPointerMove={onSignaturePointerMove}
+                onPointerUp={onSignaturePointerUp}
+                onPointerLeave={onSignaturePointerUp}
+              />
+            </div>
+            <div className="flex gap-2">
+              <button type="button" onClick={clearSignature} className="flex-1 border rounded-lg py-2">Xoá</button>
+              <button type="button" disabled={signatureUploading} onClick={uploadSignature} className="flex-1 bg-blue-600 text-white rounded-lg py-2 disabled:opacity-50">{signatureUploading?"Đang tải...":"Tải chữ ký"}</button>
+            </div>
+            {f.personalSignatureUrl ? (
+              <div className="rounded-lg border p-2">
+                <div className="text-xs text-gray-600 mb-1">Đã tải lên</div>
+                <img src={f.personalSignatureUrl} alt="personal signature" className="w-full h-32 object-contain bg-white" />
+                <input readOnly value={f.personalSignatureUrl} className="mt-2 w-full border rounded-lg px-3 py-2 text-xs" />
+              </div>
+            ) : null}
+          </div>
 
           <button disabled={loading} onClick={submit} className="w-full bg-blue-600 text-white py-3 rounded-lg disabled:opacity-50">{loading?"Đang tạo...":"Tạo hồ sơ"}</button>
         </section>
