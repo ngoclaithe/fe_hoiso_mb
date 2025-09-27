@@ -54,7 +54,7 @@ export default function HistoryPage() {
   return (
     <div className="p-4">
       <div className="flex items-center gap-3 mb-3">
-        <button onClick={() => router.push('/home')} className="p-2 rounded-md border">&lt;</button>
+        <button onClick={() => router.push('/profile')} className="p-2 rounded-md border">&lt;</button>
         <h1 className="text-lg font-semibold">Lịch sử hồ sơ vay</h1>
       </div>
 
