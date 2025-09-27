@@ -4,6 +4,18 @@ import { usePathname } from "next/navigation";
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const [show, setShow] = React.useState(false);
+
+  React.useEffect(() => {
+    try {
+      const t = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      setShow(!!t);
+    } catch {
+      setShow(false);
+    }
+  }, []);
+
+  if (!show) return null;
 
   const isActive = (href: string) => {
     if (!pathname) return false;
