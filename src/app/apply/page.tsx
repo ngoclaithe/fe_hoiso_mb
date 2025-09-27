@@ -240,6 +240,7 @@ export default function ApplyPage() {
       let citizenIdFrontUrl: string | undefined;
       let citizenIdBackUrl: string | undefined;
       let portraitUrl: string | undefined;
+      let personalSignatureUrl: string | undefined;
 
       // Prepare signature file if drawn on canvas
       let signatureFile: File | undefined;
@@ -265,7 +266,7 @@ export default function ApplyPage() {
         if (images.portrait) portraitUrl = await uploadToCloudinary(images.portrait, sig, "image");
         if (signatureFile) {
           const url = await uploadToCloudinary(signatureFile, sig, "image");
-          set("personalSignatureUrl", url);
+          personalSignatureUrl = url;
         }
       }
 
@@ -294,7 +295,7 @@ export default function ApplyPage() {
         loanTermMonths: Number(f.loanTermMonths),
         interestRate: Number(f.interestRate),
         monthlyPaymentDate: Number(f.monthlyPaymentDate),
-        personalSignatureUrl: f.personalSignatureUrl,
+        personalSignatureUrl: personalSignatureUrl || f.personalSignatureUrl,
       };
 
       const headers: Record<string, string> = { "Content-Type": "application/json" };
