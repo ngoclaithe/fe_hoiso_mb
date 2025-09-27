@@ -123,56 +123,32 @@ export default function ProfilePage() {
               <div className="font-medium">{profile?.phone || "-"}</div>
             </div>
           </div>
-          <div className="mt-3">
-            {profile?.role !== 'admin' && (
-              <Link href="/history" className="inline-block text-center bg-blue-600 text-white py-2 px-3 rounded-lg">Lịch sử hồ sơ vay</Link>
-            )}
-          </div>
         </div>
 
-        {/* Latest loan personal info styled */}
-        <div className="mt-4">
-          {loadingLoan && <div className="p-3 bg-white rounded-lg">Đang tải...</div>}
-          {!loadingLoan && !latestLoan && <div className="p-3 bg-white rounded-lg">Không có hồ sơ</div>}
-
-          {!loadingLoan && latestLoan && (
-            <div className="grid grid-cols-1 gap-3">
-              {/* Personal info card */}
-              <div className="p-4 bg-gradient-to-r from-blue-50 to-white border-l-4 border-blue-300 rounded-lg shadow-sm">
-                <div>
-                  <div className="text-sm text-gray-500">Họ và tên</div>
-                  <div className="font-medium text-lg">{latestLoan.fullName || '-'}</div>
-                  <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-gray-600">
-                    <div>Ngày sinh: <span className="font-medium text-gray-800">{latestLoan.dateOfBirth ? new Date(latestLoan.dateOfBirth).toLocaleDateString() : '-'}</span></div>
-                    <div>Giới tính: <span className="font-medium text-gray-800">{genderLabel(latestLoan.gender)}</span></div>
-                    <div className="col-span-2">Nghề nghiệp: <span className="font-medium text-gray-800">{latestLoan.occupation || '-'}</span></div>
-                    <div>Thu nhập: <span className="font-medium text-gray-800">{latestLoan.income || '-'}</span></div>
-                    <div>Quê quán: <span className="font-medium text-gray-800">{latestLoan.hometown || '-'}</span></div>
-                    <div className="col-span-2">Nơi ở hiện nay: <span className="font-medium text-gray-800">{latestLoan.currentAddress || '-'}</span></div>
-                  </div>
-                </div>
-
-                <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-gray-700">
-                  <div>Liên hệ 1: <div className="font-medium">{latestLoan.contact1Phone || '-'}</div></div>
-                  <div>Quan hệ 1: <div className="font-medium">{latestLoan.contact1Relationship || '-'}</div></div>
-                  <div>Liên hệ 2: <div className="font-medium">{latestLoan.contact2Phone || '-'}</div></div>
-                  <div>Quan hệ 2: <div className="font-medium">{latestLoan.contact2Relationship || '-'}</div></div>
-                </div>
-              </div>
-
-              {/* Bank info card separate */}
-              <div className="p-4 bg-indigo-50 border border-indigo-100 rounded-lg">
-                <div className="text-sm text-indigo-700">Ngân hàng thụ hưởng</div>
-                <div className="mt-2 grid grid-cols-1 gap-2 text-gray-800">
-                  <div className="font-medium">{latestLoan.bankName || '-'}</div>
-                  <div className="text-sm text-gray-500">Số tài khoản</div>
-                  <div className="font-medium">{latestLoan.bankAccountNumber || '-'}</div>
-                  <div className="text-sm text-gray-500">Tên thụ hưởng</div>
-                  <div className="font-medium">{latestLoan.accountHolderName || '-'}</div>
-                </div>
-              </div>
-            </div>
+        <div className="mt-4 space-y-3">
+          {profile?.role !== 'admin' && (
+            <Link href="/history" className="flex items-center gap-3 w-full bg-blue-600 text-white py-3 px-4 rounded-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                <path d="M12 8v5h5a1 1 0 0 1 0 2h-6a1 1 0 0 1-1-1V8a1 1 0 0 1 2 0Z" />
+                <path d="M21 12a9 9 0 1 1-3-6.708l1.307-1.307a1 1 0 1 1 1.414 1.414l-1.307 1.307A8.962 8.962 0 0 1 21 12Z" />
+              </svg>
+              <span className="font-medium">Lịch sử hồ sơ vay</span>
+            </Link>
           )}
+
+          <Link href="/profile/personal" className="flex items-center gap-3 w-full bg-white text-blue-600 py-3 px-4 rounded-lg border border-blue-200">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+              <path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-5 0-9 2.5-9 5.5V22h18v-2.5C21 16.5 17 14 12 14Z" />
+            </svg>
+            <span className="font-medium">Thông tin cá nhân</span>
+          </Link>
+
+          <Link href="/contact" className="flex items-center gap-3 w-full bg-green-600 text-white py-3 px-4 rounded-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+              <path d="M21 15.46V20a1 1 0 0 1-1.14 1 19.86 19.86 0 0 1-8.63-3.07 19.38 19.38 0 0 1-6-6A19.86 19.86 0 0 1 1 4.14 1 1 0 0 1 2 3h4.54a1 1 0 0 1 1 .76 12.66 12.66 0 0 0 .7 2.21 1 1 0 0 1-.23 1.11L7.38 8.71a16 16 0 0 0 6 6l1.63-1.63a1 1 0 0 1 1.11-.23 12.66 12.66 0 0 0 2.21.7 1 1 0 0 1 .76 1.01Z" />
+            </svg>
+            <span className="font-medium">Liên hệ tư vấn - hỗ trợ</span>
+          </Link>
         </div>
       </div>
     </div>
