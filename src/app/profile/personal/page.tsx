@@ -128,8 +128,6 @@ export default function PersonalInfoPage() {
             <div className="bg-white rounded-lg shadow-md border border-gray-100 p-4">
               <div className="text-sm text-gray-500">Hành động nhanh</div>
               <div className="mt-3 space-y-2">
-                <button className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-left">Quản lý tài khoản liên kết</button>
-                <button className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-left">Xem lịch sử thay đổi</button>
                 <button className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-left">Đổi mật khẩu</button>
               </div>
             </div>
