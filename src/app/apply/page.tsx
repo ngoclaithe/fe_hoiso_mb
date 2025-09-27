@@ -346,7 +346,7 @@ export default function ApplyPage() {
               className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </label>
           <label className="block text-sm">
-            Th��i hạn vay
+            Thời hạn vay
             <select
               className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={f.loanTermMonths}
@@ -372,7 +372,7 @@ export default function ApplyPage() {
               <div className="font-medium">{formatCurrencyVND(firstInstallment)}</div>
             </div>
             <div className="rounded-lg border p-3">
-              <div className="text-gray-600">Lãi suất hàng th��ng</div>
+              <div className="text-gray-600">Lãi suất hàng tháng</div>
               <div className="font-medium">{f.interestRate}%</div>
             </div>
           </div>
@@ -584,16 +584,9 @@ export default function ApplyPage() {
             <div className="flex gap-2">
               <button type="button" onClick={clearSignature} className="flex-1 border rounded-lg py-2">Xoá</button>
             </div>
-            {f.personalSignatureUrl ? (
-              <div className="rounded-lg border p-2">
-                <div className="text-xs text-gray-600 mb-1">Đã tải lên</div>
-                <img src={f.personalSignatureUrl} alt="personal signature" className="w-full h-32 object-contain bg-white" />
-                <input readOnly value={f.personalSignatureUrl} className="mt-2 w-full border rounded-lg px-3 py-2 text-xs" />
-              </div>
-            ) : null}
           </div>
 
-          <button disabled={loading} onClick={submit} className="w-full bg-blue-600 text-white py-3 rounded-lg disabled:opacity-50">{loading?"Đang tạo...":"Tạo hồ sơ"}</button>
+          <button disabled={loading} onClick={submit} className="w-full bg-blue-600 text-white py-3 rounded-lg disabled:opacity-50">{loading ? (<span className="inline-flex items-center justify-center gap-2"><svg className="w-5 h-5 text-white animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>Đang tạo...</span>) : "Tạo hồ sơ"}</button>
         </section>
       )}
       </div>
