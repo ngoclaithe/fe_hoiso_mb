@@ -60,15 +60,19 @@ export default function PersonalInfoPage() {
         {!loading && !latestLoan && <div className="p-3 bg-white rounded-lg">Không có hồ sơ</div>}
 
         {!loading && latestLoan && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Left: Main profile card */}
-            <div className="md:col-span-2 bg-white rounded-lg shadow-md border border-gray-100 p-4">
+          <div className="space-y-4">
+            {/* Main profile card */}
+            <div className="bg-white rounded-lg shadow-md border border-gray-100 p-4">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center text-blue-700 font-semibold text-xl">{(latestLoan.fullName||"-").slice(0,2).toUpperCase()}</div>
-                <div>
+                <div className="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center text-blue-700 font-semibold text-lg">{(latestLoan.fullName||"-").slice(0,2).toUpperCase()}</div>
+                <div className="flex-1">
                   <div className="text-sm text-gray-500">Họ và tên</div>
                   <div className="font-semibold text-lg text-gray-800">{latestLoan.fullName || '-'}</div>
-                  <div className="text-sm text-gray-500 mt-1">Nghề nghiệp: <span className="font-medium text-gray-800">{latestLoan.occupation || '-'}</span></div>
+                  <div className="text-sm text-gray-500 mt-1">{latestLoan.occupation || ''}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-xs text-gray-500">Giới tính</div>
+                  <div className="font-medium text-gray-800">{genderLabel(latestLoan.gender)}</div>
                 </div>
               </div>
 
@@ -78,11 +82,6 @@ export default function PersonalInfoPage() {
                   <div className="font-medium text-gray-800">{latestLoan.dateOfBirth ? new Date(latestLoan.dateOfBirth).toLocaleDateString() : '-'}</div>
                 </div>
                 <div>
-                  <div className="text-xs text-gray-500">Giới tính</div>
-                  <div className="font-medium text-gray-800">{genderLabel(latestLoan.gender)}</div>
-                </div>
-
-                <div>
                   <div className="text-xs text-gray-500">Thu nhập</div>
                   <div className="font-medium text-gray-800">{latestLoan.income || '-'}</div>
                 </div>
@@ -91,44 +90,49 @@ export default function PersonalInfoPage() {
                   <div className="text-xs text-gray-500">Quê quán</div>
                   <div className="font-medium text-gray-800">{latestLoan.hometown || '-'}</div>
                 </div>
-
-                <div className="col-span-2">
+                <div>
                   <div className="text-xs text-gray-500">Nơi ở hiện nay</div>
                   <div className="font-medium text-gray-800">{latestLoan.currentAddress || '-'}</div>
                 </div>
               </div>
 
-              <div className="mt-6 flex items-center gap-3">
-                <button onClick={() => router.push('/profile')} className="px-4 py-2 bg-blue-600 text-white rounded-lg">Quay lại</button>
-                <button className="px-4 py-2 border border-gray-200 rounded-lg">Chỉnh sửa thông tin</button>
+              {/* Contacts compact */}
+              <div className="mt-4">
+                <div className="text-sm text-gray-500">Liên hệ khẩn cấp</div>
+                <div className="mt-2 space-y-2">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                    <div>
+                      <div className="text-xs text-gray-500">Liên hệ 1 • {latestLoan.contact1Relationship || '-'}</div>
+                      <div className="font-medium text-gray-800">{latestLoan.contact1Phone || '-'}</div>
+                    </div>
+                    <button className="text-blue-600 text-sm">Gọi</button>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                    <div>
+                      <div className="text-xs text-gray-500">Liên hệ 2 • {latestLoan.contact2Relationship || '-'}</div>
+                      <div className="font-medium text-gray-800">{latestLoan.contact2Phone || '-'}</div>
+                    </div>
+                    <button className="text-blue-600 text-sm">Gọi</button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button onClick={() => router.push('/profile')} className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg">Quay lại</button>
+                <button className="w-full px-4 py-3 border border-gray-200 rounded-lg">Chỉnh sửa thông tin</button>
               </div>
             </div>
 
-            {/* Right: Contacts and quick info */}
-            <aside className="bg-white rounded-lg shadow-md border border-gray-100 p-4">
-              <div className="text-sm text-gray-500">Liên hệ khẩn cấp</div>
-              <div className="mt-2 space-y-3">
-                <div>
-                  <div className="text-xs text-gray-500">Liên hệ 1</div>
-                  <div className="font-medium text-gray-800">{latestLoan.contact1Phone || '-'}</div>
-                  <div className="text-xs text-gray-500">Quan hệ: {latestLoan.contact1Relationship || '-'}</div>
-                </div>
-
-                <div>
-                  <div className="text-xs text-gray-500">Liên hệ 2</div>
-                  <div className="font-medium text-gray-800">{latestLoan.contact2Phone || '-'}</div>
-                  <div className="text-xs text-gray-500">Quan hệ: {latestLoan.contact2Relationship || '-'}</div>
-                </div>
+            {/* Quick actions card */}
+            <div className="bg-white rounded-lg shadow-md border border-gray-100 p-4">
+              <div className="text-sm text-gray-500">Hành động nhanh</div>
+              <div className="mt-3 space-y-2">
+                <button className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-left">Quản lý tài khoản liên kết</button>
+                <button className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-left">Xem lịch sử thay đổi</button>
+                <button className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-left">Đổi mật khẩu</button>
               </div>
-
-              <div className="mt-4">
-                <div className="text-sm text-gray-500">Hành động</div>
-                <div className="mt-2 flex flex-col gap-2">
-                  <button className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-left">Quản lý tài khoản liên kết</button>
-                  <button className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-left">Xem lịch sử thay đổi</button>
-                </div>
-              </div>
-            </aside>
+            </div>
           </div>
         )}
       </div>
