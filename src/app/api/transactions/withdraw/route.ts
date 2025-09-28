@@ -10,11 +10,17 @@ export async function POST(req: NextRequest) {
   headers["Content-Type"] = "application/json";
   try { console.log("Incoming Content-Type:", incomingCT); } catch {}
 
-  const body = await req.json().catch(() => null);
+  // Read raw body as text to debug Content-Type mismatches
+  const rawText = await req.text().catch(() => "");
+  try { console.log("Incoming raw body text:", rawText); } catch {}
+  let body: any = null;
+  if (rawText) {
+    try { body = JSON.parse(rawText); } catch { body = null; }
+  }
   if (!body || typeof body !== "object") return new Response(JSON.stringify({ message: "Missing body" }), { status: 400 });
 
   // Normalize amount: accept string or number, remove thousand separators, ensure max 2 decimals
-  const rawAmount = (body as any).amount;
+  const rawAmount = body.amount;
   let amountNum: number | null = null;
   if (typeof rawAmount === 'number') amountNum = rawAmount;
   if (typeof rawAmount === 'string') {
