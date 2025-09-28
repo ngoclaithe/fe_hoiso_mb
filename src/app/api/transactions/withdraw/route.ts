@@ -6,20 +6,14 @@ export async function POST(req: NextRequest) {
   const headers: Record<string, string> = {};
   if (auth) headers["authorization"] = auth;
   
-  // Force Content-Type to application/json
   headers["Content-Type"] = "application/json";
 
   try {
-    // Đọc body một lần duy nhất
-    const body = await req.json(); // Sử dụng req.json() thay vì req.text()
-    
-    console.log("Received body:", body);
-
+    const body = await req.json();     
     if (!body || typeof body !== "object") {
       return new Response(JSON.stringify({ message: "Missing body" }), { status: 400 });
     }
 
-    // Normalize amount
     const rawAmount = body.amount;
     let amountNum: number | null = null;
     
@@ -37,9 +31,6 @@ export async function POST(req: NextRequest) {
     amountNum = Math.round(amountNum * 100) / 100;
     const forwardBody = { ...body, amount: amountNum };
 
-    console.log("Forwarding body:", forwardBody);
-
-    // Truyền body đã được stringify
     return forwardRaw(req, "/transactions/withdraw", { 
       method: "POST", 
       includeBody: true, 
