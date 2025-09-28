@@ -31,7 +31,15 @@ export default function WalletPage() {
       }
       if (balRes.ok) {
         const b = await balRes.json().catch(() => null);
-        const val = typeof b === 'number' ? b : (typeof b?.balance === 'number' ? b.balance : 0);
+        let val = 0;
+        if (typeof b === 'number') {
+          val = b;
+        } else if (b && typeof b.balance === 'number') {
+          val = b.balance;
+        } else if (b && typeof b.balance === 'string') {
+          const parsed = Number(b.balance);
+          val = Number.isFinite(parsed) ? parsed : 0;
+        }
         setBalance(val || 0);
       }
     } finally {
