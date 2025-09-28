@@ -140,50 +140,6 @@ export default function HistoryPage() {
                 <button onClick={() => setShowContract(false)} className="text-gray-500 hover:text-gray-800">Đóng</button>
               </div>
             </div>
-
-            <div className="mb-4">
-              <div className="mb-2 text-sm text-gray-600">Bên cho vay (Bên A) và chữ ký bên A mặc định</div>
-              <div className="p-3 border rounded-lg bg-gray-50">
-                <div className="font-medium">Bên cho vay (Bên A): Ngân hàng MB Quân đội</div>
-                <div className="mt-2">Chữ ký bên A: <span className="font-semibold">Ngân hàng MB Quân đội</span></div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Bên vay (Bên B) - Họ và tên</label>
-                <input value={contractData.borrowerName} onChange={(e) => setContractData(prev => ({...prev, borrowerName: e.target.value}))} className="w-full border rounded-md p-2" />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Số CCCD</label>
-                <input value={contractData.borrowerCCCD} onChange={(e) => setContractData(prev => ({...prev, borrowerCCCD: e.target.value}))} className="w-full border rounded-md p-2" />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Ngày ký</label>
-                <input type="datetime-local" value={contractData.signedAt} onChange={(e) => setContractData(prev => ({...prev, signedAt: e.target.value}))} className="w-full border rounded-md p-2" />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Số tiền vay</label>
-                <input value={contractData.amount} onChange={(e) => setContractData(prev => ({...prev, amount: e.target.value}))} className="w-full border rounded-md p-2" />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Mã hợp đồng</label>
-                <input value={contractData.code} onChange={(e) => setContractData(prev => ({...prev, code: e.target.value}))} className="w-full border rounded-md p-2" />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Thời hạn</label>
-                <input value={contractData.term} onChange={(e) => setContractData(prev => ({...prev, term: e.target.value}))} className="w-full border rounded-md p-2" />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Lãi suất</label>
-                <input value={contractData.interest} onChange={(e) => setContractData(prev => ({...prev, interest: e.target.value}))} className="w-full border rounded-md p-2" />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Chữ ký bên B</label>
-                <input value={contractData.signatureB} onChange={(e) => setContractData(prev => ({...prev, signatureB: e.target.value}))} className="w-full border rounded-md p-2" />
-              </div>
-            </div>
-
             <div className="border-t pt-4">
               <div className="prose max-w-none">
                 <h3>HỢP ĐỒNG VAY TIỀN</h3>
