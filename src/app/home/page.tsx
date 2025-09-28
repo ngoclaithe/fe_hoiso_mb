@@ -12,17 +12,9 @@ interface UserProfile {
   email?: string;
 }
 
-const firstSlides = [
-  "https://www.anphabe.com/file-deliver.php?key=hcWDxaBjm7TXnZedhtmlrtKWiG3ZcGOgWtaWr1qhqG5mbluboZ1UoKNrZp1aa2dmZ2maVXHXamiXclaUx8vF1tDYwdrHnNaehp7VnZSgU1ehrg",
-  "https://news.mbbank.com.vn/file-service/uploads/v1/images/ee3a94ed-b53c-46e8-89e3-ddd15b0e9449-imagejpg.jpg",
-  "https://statictttc.kinhtedothi.vn/zoom/1000/Uploaded/nguyengiang/2024_11_04/screenshot_2024-09-03_070257_BTOS.jpg",
-];
+const firstSlides = ["/images/tren1.jpg", "/images/tren2.jpg", "/images/tren3.jpg"];
 
-const secondSlides = [
-  "https://hopdongdientuhanoi.mobifone.vn/wp-content/uploads/2025/04/vay-tien-bang-cccd.jpg",
-  "https://cdn.chanhtuoi.com/uploads/2022/08/vay-tien-chi-can-cmnd-va-bang-lai-01.jpg",
-  "https://simg.zalopay.com.vn/zlp-website/assets/app_vay_tien_online_9_4fe133af9d.jpg",
-];
+const secondSlides = ["/images/duoi1.jpg", "/images/duoi2.jpg", "/images/duoi3.jpg"];
 
 function maskPhone(phone: string) {
   if (phone.length < 5) return phone;
