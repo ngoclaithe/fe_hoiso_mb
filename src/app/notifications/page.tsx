@@ -101,7 +101,7 @@ export default function NotificationsPage() {
               </div>
               <div className="flex items-center gap-2">
                 {!n.read && (
-                  <button onClick={() => markRead(n.id)} className="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded">��ã đọc</button>
+                  <button onClick={() => markRead(n.id)} className="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded">Đã đọc</button>
                 )}
                 <button onClick={() => remove(n.id)} className="text-xs px-2 py-1 bg-gray-100 rounded">Xóa</button>
               </div>
