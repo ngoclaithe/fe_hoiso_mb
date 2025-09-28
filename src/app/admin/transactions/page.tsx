@@ -39,6 +39,8 @@ export default function AdminTransactionsPage() {
   const [error, setError] = useState<string | null>(null);
   const [limit, setLimit] = useState(10);
   const [offset, setOffset] = useState(0);
+  const [total, setTotal] = useState<number | null>(null);
+  const [hasMore, setHasMore] = useState<boolean>(false);
 
   async function load() {
     setLoading(true);
@@ -52,14 +54,20 @@ export default function AdminTransactionsPage() {
       if (!res.ok) throw new Error(await res.text().catch(() => `Lỗi ${res.status}`));
       const data = await res.json().catch(() => []);
 
-      // Normalize transaction array from various backend shapes
+      // extract transactions array and pagination
       let txArr: RawTx[] = [];
+      let pagination: any = null;
+
       if (Array.isArray(data)) txArr = data;
       else if (Array.isArray(data.transactions)) txArr = data.transactions;
       else if (data && Array.isArray(data.data)) txArr = data.data;
       else if (data && data.data && Array.isArray(data.data.transactions)) txArr = data.data.transactions;
       else if (data && data.transactions && Array.isArray(data.transactions)) txArr = data.transactions;
-      else txArr = [];
+
+      // try to read pagination info
+      if (data && data.pagination) pagination = data.pagination;
+      if (data && data.data && data.data.pagination) pagination = data.data.pagination;
+      if (data && data.data && data.data.transactions && data.data.pagination) pagination = data.data.pagination;
 
       const mapped = txArr.map((t) => ({
         id: detectId(t),
@@ -79,6 +87,16 @@ export default function AdminTransactionsPage() {
         return isWithdraw && isPending;
       });
 
+      // update pagination state
+      if (pagination && typeof pagination.total === 'number') {
+        setTotal(pagination.total);
+        setHasMore(Boolean(pagination.hasMore || (pagination.offset + pagination.limit < pagination.total)));
+      } else {
+        // fallback: infer total from response
+        setTotal(filtered.length + offset);
+        setHasMore(filtered.length === limit);
+      }
+
       setItems(filtered);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Lỗi tải dữ liệu');
@@ -90,7 +108,7 @@ export default function AdminTransactionsPage() {
   useEffect(() => { load(); }, [limit, offset]);
 
   function prev() { if (offset - limit >= 0) setOffset(offset - limit); }
-  function next() { setOffset(offset + limit); }
+  function next() { if (!total || offset + limit < (total || 0)) setOffset(offset + limit); }
 
   function formatVND(v?: number | string) {
     const n = typeof v === 'number' ? v : (typeof v === 'string' ? Number(v.replace(/\s|,/g, '')) : NaN);
