@@ -76,7 +76,15 @@ export default function WalletPage() {
       if (!amountStr) return;
       const amount = Number(amountStr);
       if (!Number.isFinite(amount) || amount <= 0) return alert("Số tiền không hợp lệ");
-      const res = await fetch("/api/wallet/withdraw", {
+
+      // Fetch profile to obtain userId (robust to different field names)
+      const profileRes = await fetch("/api/auth/profile", { cache: "no-store", headers: { Authorization: `Bearer ${token}` } });
+      if (!profileRes.ok) throw new Error("Không lấy được thông tin người dùng");
+      const profile = await profileRes.json().catch(() => ({} as any));
+      const userId = profile?.id || profile?._id || profile?.userId || profile?.uuid;
+      if (!userId) throw new Error("Không xác định được userId");
+
+      const res = await fetch(`/api/transactions/withdraw/${encodeURIComponent(String(userId))}`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ amount }),
@@ -87,31 +95,6 @@ export default function WalletPage() {
       }
       await loadAll();
       alert("Đã gửi yêu cầu rút tiền");
-    } catch (e: unknown) {
-      const m = e instanceof Error ? e.message : "Lỗi";
-      alert(m);
-    }
-  }
-
-  async function handleAddBalance() {
-    try {
-      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      if (!token) return alert("Bạn cần đăng nhập");
-      const amountStr = prompt("Nhập số tiền muốn nạp (VND)", "100000");
-      if (!amountStr) return;
-      const amount = Number(amountStr);
-      if (!Number.isFinite(amount) || amount <= 0) return alert("Số tiền không hợp lệ");
-      const res = await fetch("/api/wallet/add-balance", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ amount }),
-      });
-      if (!res.ok) {
-        const t = await res.text().catch(() => "");
-        throw new Error(t || "Nạp tiền thất bại");
-      }
-      await loadAll();
-      alert("Đã nạp tiền vào ví");
     } catch (e: unknown) {
       const m = e instanceof Error ? e.message : "Lỗi";
       alert(m);
