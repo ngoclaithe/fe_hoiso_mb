@@ -53,7 +53,6 @@ export default function Header() {
     };
   }, []);
 
-  const initials = profile?.username ? profile.username.slice(0,2).toUpperCase() : "U";
 
   // Hide global header on specific pages (and their subpaths)
   const hidePrefixes = ["/notifications", "/profile", "/history"];
