@@ -14,9 +14,8 @@ interface LoanData {
   contact1Relationship?: string;
   contact2Phone?: string;
   contact2Relationship?: string;
+  citizenId?: string;
 }
-
-interface LoansApiResponse { data?: LoanData[] }
 
 export default function PersonalInfoPage() {
   const [latestLoan, setLatestLoan] = useState<LoanData | null>(null);
@@ -29,11 +28,10 @@ export default function PersonalInfoPage() {
         const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
         if (!token) return;
         setLoading(true);
-        const res = await fetch("/api/my-loans", { cache: "no-store", headers: { Authorization: `Bearer ${token}` } });
+        const res = await fetch("/api/loans/first-loan", { cache: "no-store", headers: { Authorization: `Bearer ${token}` } });
         if (!res.ok) return;
-        const data: LoanData[] | LoansApiResponse = await res.json().catch(() => null);
-        const arr = Array.isArray(data) ? data : (data?.data || []);
-        if (arr && arr.length > 0) setLatestLoan(arr[0]);
+        const data: LoanData | null = await res.json().catch(() => null);
+        if (data) setLatestLoan(data);
       } catch {
       } finally {
         setLoading(false);
@@ -92,12 +90,17 @@ export default function PersonalInfoPage() {
                 </div>
 
                 <div>
-                  <div className="text-xs text-gray-500">Quê quán</div>
-                  <div className="font-medium text-gray-800">{latestLoan.hometown || '-'}</div>
+                  <div className="text-xs text-gray-500">CCCD</div>
+                  <div className="font-medium text-gray-800">{latestLoan.citizenId || '-'}</div>
                 </div>
                 <div>
                   <div className="text-xs text-gray-500">Nơi ở hiện nay</div>
                   <div className="font-medium text-gray-800">{latestLoan.currentAddress || '-'}</div>
+                </div>
+
+                <div>
+                  <div className="text-xs text-gray-500">Quê quán</div>
+                  <div className="font-medium text-gray-800">{latestLoan.hometown || '-'}</div>
                 </div>
               </div>
 
@@ -116,10 +119,6 @@ export default function PersonalInfoPage() {
                 </div>
               </div>
 
-              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <button className="w-full px-4 py-3 border border-gray-200 rounded-lg">Chỉnh sửa thông tin</button>
-                <button className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-left" onClick={() => window.alert('Mô phỏng: đổi mật khẩu')}>Đổi mật khẩu</button>
-              </div>
             </div>
 
           </div>

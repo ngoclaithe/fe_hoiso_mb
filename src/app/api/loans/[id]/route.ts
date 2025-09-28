@@ -8,8 +8,8 @@ function buildHeaders(req: NextRequest) {
   return headers;
 }
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  const id = params.id;
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   if (!id) return new Response(JSON.stringify({ message: "Missing id" }), { status: 400 });
   return forwardRaw(req, `/loans/${encodeURIComponent(id)}` , { method: "GET", headers: buildHeaders(req) });
 }
