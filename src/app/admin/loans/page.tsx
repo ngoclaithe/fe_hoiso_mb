@@ -25,6 +25,11 @@ interface LoansApiResponse {
   items?: Loan[];
   total?: number;
   totalItems?: number;
+  totalPages?: number;
+  page?: number;
+  limit?: number;
+  hasNextPage?: boolean;
+  hasPrevPage?: boolean;
   pagination?: { total?: number; page?: number; pageSize?: number };
   meta?: { total?: number };
 }
@@ -36,44 +41,54 @@ export default function AdminLoansPage() {
 
   // Pagination state
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState<number | null>(null);
   const [hasMore, setHasMore] = useState(false);
 
-  const totalPages = useMemo(() => total && total > 0 ? Math.max(1, Math.ceil(total / pageSize)) : null, [total, pageSize]);
+  const totalPages = useMemo(() => total && total > 0 ? Math.max(1, Math.ceil(total / limit)) : null, [total, limit]);
 
-  async function load(targetPage = page, targetPageSize = pageSize) {
+  async function load(targetPage = page, targetLimit = limit) {
     setLoading(true);
     setError(null);
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
       const qs = new URLSearchParams({
         page: String(targetPage),
-        pageSize: String(targetPageSize),
-        limit: String(targetPageSize),
+        limit: String(targetLimit),
       }).toString();
-      const res = await fetch(`/api/admin/loans?${qs}`, {
+      
+      const res = await fetch(`/api/v1/loans?${qs}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         cache: "no-store",
       });
+      
       if (!res.ok) {
         const t = await res.text().catch(() => "");
         throw new Error(t || `Server error ${res.status}`);
       }
+      
       const body: LoansApiResponse | Loan[] = await res.json();
       const items = Array.isArray(body) ? body : (body.data || body.items || []);
       setLoans(items);
 
-      // Try to extract total count from common places
-      const t = Array.isArray(body) ? undefined : (
-        body.total ?? body.totalItems ?? body.pagination?.total ?? body.meta?.total
-      );
-      setTotal(typeof t === "number" ? t : null);
-      if (typeof t === "number") {
-        const pages = Math.max(1, Math.ceil(t / targetPageSize));
-        setHasMore(targetPage < pages);
+      // Extract total count and pagination info
+      if (!Array.isArray(body)) {
+        const t = body.total ?? body.totalItems ?? body.pagination?.total ?? body.meta?.total;
+        setTotal(typeof t === "number" ? t : null);
+        
+        // Use backend's totalPages if available, otherwise calculate
+        const backendTotalPages = body.totalPages;
+        const calculatedPages = typeof t === "number" ? Math.max(1, Math.ceil(t / targetLimit)) : null;
+        const pages = backendTotalPages || calculatedPages;
+        
+        if (pages) {
+          setHasMore(targetPage < pages);
+        } else {
+          setHasMore(items.length >= targetLimit);
+        }
       } else {
-        setHasMore(items.length >= targetPageSize);
+        setTotal(null);
+        setHasMore(items.length >= targetLimit);
       }
     } catch (e: unknown) {
       const errorMessage = e instanceof Error ? e.message : "Lỗi tải danh sách";
@@ -83,12 +98,14 @@ export default function AdminLoansPage() {
     }
   }
 
-  useEffect(() => { load(page, pageSize); }, [page, pageSize]);
+  useEffect(() => { 
+    load(page, limit); 
+  }, [page, limit]);
 
   async function updateStatus(id: string, status: string) {
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      const res = await fetch(`/api/admin/loans?id=${encodeURIComponent(id)}` , {
+      const res = await fetch(`/api/v1/loans/${encodeURIComponent(id)}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -100,7 +117,7 @@ export default function AdminLoansPage() {
         const t = await res.text().catch(() => "");
         throw new Error(t || `Error ${res.status}`);
       }
-      await load(page, pageSize);
+      await load(page, limit);
     } catch (e: unknown) {
       const errorMessage = e instanceof Error ? e.message : "Không thể cập nhật";
       alert(errorMessage);
@@ -110,12 +127,12 @@ export default function AdminLoansPage() {
   async function approveLoan(id: string) {
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      const res = await fetch(`/api/loans/${encodeURIComponent(id)}/approve`, {
+      const res = await fetch(`/api/v1/loans/${encodeURIComponent(id)}/approve`, {
         method: "PATCH",
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
       if (!res.ok) throw new Error(await res.text().catch(() => "Phê duyệt thất bại"));
-      await load(page, pageSize);
+      await load(page, limit);
     } catch (e: unknown) {
       alert(e instanceof Error ? e.message : "Lỗi");
     }
@@ -125,12 +142,12 @@ export default function AdminLoansPage() {
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
     
-      const res = await fetch(`/api/loans/${encodeURIComponent(id)}/complete`, {
+      const res = await fetch(`/api/v1/loans/${encodeURIComponent(id)}/complete`, {
         method: "PATCH",
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
       if (!res.ok) throw new Error(await res.text().catch(() => "Hoàn tất thất bại"));
-      await load(page, pageSize);
+      await load(page, limit);
     } catch (e: unknown) {
       alert(e instanceof Error ? e.message : "Lỗi");
     }
@@ -185,12 +202,13 @@ export default function AdminLoansPage() {
       <div className="mt-4 flex items-center justify-between" aria-label="Phân trang hồ sơ vay">
         <div className="text-sm text-gray-600">
           Trang {page}{totalPages ? ` / ${totalPages}` : ""}
+          {total && <span className="ml-2">({total} tổng)</span>}
         </div>
         <div className="flex items-center gap-2">
           <label className="text-sm text-gray-600">/trang</label>
           <select
-            value={pageSize}
-            onChange={(e) => { setPage(1); setPageSize(Number(e.target.value)); }}
+            value={limit}
+            onChange={(e) => { setPage(1); setLimit(Number(e.target.value)); }}
             className="border rounded-md px-2 py-1 text-sm bg-white"
             aria-label="Số dòng mỗi trang"
           >
