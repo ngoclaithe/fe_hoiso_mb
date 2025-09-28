@@ -6,8 +6,9 @@ export async function POST(req: NextRequest) {
   const headers: Record<string, string> = {};
   if (auth) headers["authorization"] = auth;
   const incomingCT = req.headers.get("content-type") || req.headers.get("Content-Type");
-  // Ensure we forward a proper Content-Type header (backend expects application/json)
-  headers["Content-Type"] = (incomingCT && String(incomingCT)) || "application/json";
+  // Force forwarding Content-Type as application/json to backend
+  headers["Content-Type"] = "application/json";
+  try { console.log("Incoming Content-Type:", incomingCT); } catch {}
 
   const body = await req.json().catch(() => null);
   if (!body || typeof body !== "object") return new Response(JSON.stringify({ message: "Missing body" }), { status: 400 });
