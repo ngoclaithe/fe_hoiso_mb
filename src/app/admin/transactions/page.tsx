@@ -140,8 +140,13 @@ export default function AdminTransactionsPage() {
 
       <div className="mt-4 flex items-center gap-2">
         <button onClick={prev} disabled={offset === 0} className="px-3 py-2 border rounded">Trước</button>
-        <button onClick={next} className="px-3 py-2 border rounded">Kế</button>
-        <div className="text-sm text-gray-500">Hiển thị {items.length} mục</div>
+        <button onClick={next} disabled={!hasMore} className="px-3 py-2 border rounded">Kế</button>
+        <div className="text-sm text-gray-500">
+          Hiển thị {items.length} mục
+          {total != null && (
+            <span className="ml-3">— Trang {Math.floor(offset / limit) + 1} / {Math.max(1, Math.ceil((total || 0) / limit))} (Tổng {total})</span>
+          )}
+        </div>
       </div>
     </div>
   );
