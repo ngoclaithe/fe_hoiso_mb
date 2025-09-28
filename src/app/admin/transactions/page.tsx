@@ -1,7 +1,7 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 
-interface RawTx { [k: string]: any }
+type RawTx = Record<string, unknown>;
 interface TxItem {
   id: string;
   amount?: number | string;
@@ -14,44 +14,66 @@ interface TxItem {
   balanceAfter?: number | string;
 }
 
+interface Pagination { total?: number; hasMore?: boolean; offset?: number; limit?: number }
+
 function detectAmount(t: RawTx): number | string | undefined {
-  return t.amount ?? t.value ?? t.tx_amount ?? t.transaction_amount;
+  const r = t as Record<string, unknown>;
+  const a = r['amount'] ?? r['value'] ?? r['tx_amount'] ?? r['transaction_amount'];
+  if (typeof a === 'number' || typeof a === 'string') return a as number | string;
+  return undefined;
 }
 
 function detectType(t: RawTx): string | undefined {
-  return (t.type || t.txn_type || t.transaction_type || t.kind) as string | undefined;
+  const r = t as Record<string, unknown>;
+  const v = r['type'] ?? r['txn_type'] ?? r['transaction_type'] ?? r['kind'];
+  return typeof v === 'string' ? v : undefined;
 }
 
 function detectStatus(t: RawTx): string | undefined {
-  return (t.status || t.state || t.tx_status) as string | undefined;
+  const r = t as Record<string, unknown>;
+  const v = r['status'] ?? r['state'] ?? r['tx_status'];
+  return typeof v === 'string' ? v : undefined;
 }
 
 function detectId(t: RawTx): string {
-  if (typeof t.id === 'string') return t.id;
-  if (typeof t._id === 'string') return t._id;
-  return String(t.id ?? t._id ?? '');
+  const r = t as Record<string, unknown>;
+  const id = r['id'];
+  const _id = r['_id'];
+  if (typeof id === 'string') return id;
+  if (typeof _id === 'string') return _id;
+  return String(id ?? _id ?? '');
 }
 
 function detectTime(t: RawTx): string | undefined {
-  return (t.createdAt || t.created_at || t.time || t.date) as string | undefined;
+  const r = t as Record<string, unknown>;
+  const v = r['createdAt'] ?? r['created_at'] ?? r['time'] ?? r['date'];
+  return typeof v === 'string' ? v : undefined;
 }
 
 function detectUser(t: RawTx): string | undefined {
-  if (t.wallet?.userId) return t.wallet.userId;
-  return (t.user?.username || t.user?.name || t.user) as string | undefined;
+  const r = t as Record<string, unknown>;
+  const wallet = r['wallet'] as Record<string, unknown> | undefined;
+  if (wallet && typeof wallet['userId'] === 'string') return wallet['userId'] as string;
+  const user = r['user'];
+  if (!user) return undefined;
+  if (typeof user === 'string') return user;
+  const u = user as Record<string, unknown>;
+  if (typeof u['username'] === 'string') return u['username'] as string;
+  if (typeof u['name'] === 'string') return u['name'] as string;
+  return undefined;
 }
 
 export default function AdminTransactionsPage() {
   const [items, setItems] = useState<TxItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [limit, setLimit] = useState(10);
+  const [limit] = useState(10);
   const [offset, setOffset] = useState(0);
   const [total, setTotal] = useState<number | null>(null);
   const [hasMore, setHasMore] = useState<boolean>(false);
   const [itemLoading, setItemLoading] = useState<Record<string, boolean>>({});
 
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -61,22 +83,28 @@ export default function AdminTransactionsPage() {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
       if (!res.ok) throw new Error(await res.text().catch(() => `Lỗi ${res.status}`));
-      const data = await res.json().catch(() => []);
+      const data = await res.json().catch(() => ({} as Record<string, unknown>));
 
       // extract transactions array and pagination
       let txArr: RawTx[] = [];
-      let pagination: any = null;
+      let pagination: Pagination | null = null;
 
-      if (Array.isArray(data)) txArr = data;
-      else if (Array.isArray(data.transactions)) txArr = data.transactions;
-      else if (data && Array.isArray(data.data)) txArr = data.data;
-      else if (data && data.data && Array.isArray(data.data.transactions)) txArr = data.data.transactions;
-      else if (data && data.transactions && Array.isArray(data.transactions)) txArr = data.transactions;
+      const dd = data as Record<string, unknown>;
+
+      if (Array.isArray(data)) txArr = data as RawTx[];
+      else if (Array.isArray(dd['transactions'])) txArr = dd['transactions'] as RawTx[];
+      else if (Array.isArray(dd['data'])) txArr = dd['data'] as RawTx[];
+      else if (dd['data'] && typeof dd['data'] === 'object') {
+        const d2 = dd['data'] as Record<string, unknown>;
+        if (Array.isArray(d2['transactions'])) txArr = d2['transactions'] as RawTx[];
+      }
 
       // try to read pagination info
-      if (data && data.pagination) pagination = data.pagination;
-      if (data && data.data && data.data.pagination) pagination = data.data.pagination;
-      if (data && data.data && data.data.transactions && data.data.pagination) pagination = data.data.pagination;
+      if (dd && dd['pagination'] && typeof dd['pagination'] === 'object') pagination = dd['pagination'] as Pagination;
+      if (dd && dd['data'] && typeof dd['data'] === 'object') {
+        const d2 = dd['data'] as Record<string, unknown>;
+        if (d2['pagination'] && typeof d2['pagination'] === 'object') pagination = d2['pagination'] as Pagination;
+      }
 
       const mapped = txArr.map((t) => ({
         id: detectId(t),
@@ -85,9 +113,9 @@ export default function AdminTransactionsPage() {
         type: (detectType(t) || '').toString(),
         user: detectUser(t),
         time: detectTime(t),
-        description: t.description,
-        balanceBefore: t.balanceBefore,
-        balanceAfter: t.balanceAfter,
+        description: (t as Record<string, unknown>)['description'] as string | undefined,
+        balanceBefore: (t as Record<string, unknown>)['balanceBefore'] as number | string | undefined,
+        balanceAfter: (t as Record<string, unknown>)['balanceAfter'] as number | string | undefined,
       }));
 
       // filter to only withdrawals
@@ -100,7 +128,7 @@ export default function AdminTransactionsPage() {
       // update pagination state
       if (pagination && typeof pagination.total === 'number') {
         setTotal(pagination.total);
-        setHasMore(Boolean(pagination.hasMore || (pagination.offset + pagination.limit < pagination.total)));
+        setHasMore(Boolean(pagination.hasMore || ((pagination.offset || 0) + (pagination.limit || 0) < (pagination.total || 0))));
       } else {
         // fallback: infer total from response
         setTotal(filtered.length + offset);
@@ -113,9 +141,9 @@ export default function AdminTransactionsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [limit, offset]);
 
-  useEffect(() => { load(); }, [limit, offset]);
+  useEffect(() => { load(); }, [load]);
 
   function prev() { if (offset - limit >= 0) setOffset(offset - limit); }
   function next() { if (!total || offset + limit < (total || 0)) setOffset(offset + limit); }
@@ -200,7 +228,7 @@ export default function AdminTransactionsPage() {
       {loading && (
         <div className="flex items-center justify-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="ml-2 text-gray-600">Đang tải...</span>
+          <span className="ml-2 text-gray-600">��ang tải...</span>
         </div>
       )}
 
