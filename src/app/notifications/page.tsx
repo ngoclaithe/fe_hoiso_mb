@@ -17,11 +17,28 @@ export default function NotificationsPage() {
   const [error, setError] = useState<string | null>(null);
 
   function normalize(n: RawNotification): NotificationItem | null {
-    const id = String(n.id || n._id || "");
+    const obj = n as Record<string, unknown>;
+
+    const idVal = obj["id"] ?? obj["_id"];
+    const id = typeof idVal === "string" ? idVal : (idVal != null ? String(idVal) : "");
     if (!id) return null;
-    const text = n.title || n.message || n.content || n.text || "Thông báo";
-    const read = Boolean(n.read ?? n.is_read ?? n.isRead ?? false);
-    const time = n.createdAt || n.created_at || n.time || undefined;
+
+    const getStr = (...keys: string[]) => {
+      for (const k of keys) {
+        const v = obj[k];
+        if (typeof v === "string" && v.trim()) return v;
+      }
+      return undefined;
+    };
+
+    const text = getStr("title", "message", "content", "text") ?? "Thông báo";
+
+    const readRaw = obj["read"] ?? obj["is_read"] ?? obj["isRead"];
+    const read = Boolean(readRaw);
+
+    const timeRaw = obj["createdAt"] ?? obj["created_at"] ?? obj["time"];
+    const time = typeof timeRaw === "string" || typeof timeRaw === "number" ? String(timeRaw) : undefined;
+
     return { id, text, read, time };
   }
 
