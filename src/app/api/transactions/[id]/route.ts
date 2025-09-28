@@ -20,6 +20,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   // If path is /transactions/withdraw, forward to backend withdraw endpoint
   if (id === "withdraw") {
     const bodyText = await req.text().catch(() => null);
+    const incomingCT = req.headers.get("content-type") || req.headers.get("Content-Type");
+    headers["Content-Type"] = (incomingCT && String(incomingCT)) || "application/json";
+    try { console.log("[dynamic route] forwarding withdraw bodyText:", bodyText); } catch {}
     return forwardRaw(req, `/transactions/withdraw`, { method: "POST", includeBody: true, bodyText: bodyText || undefined, headers });
   }
 
