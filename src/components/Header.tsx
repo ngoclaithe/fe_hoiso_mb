@@ -77,7 +77,7 @@ export default function Header() {
               </Link>
 
               {profile?.role === 'admin' && (
-                <Link href="/admin/dashboard" className="px-3 py-1 rounded-md bg-yellow-100 text-yellow-800 text-sm">Admin</Link>
+                <Link href="/admin/users" className="px-3 py-1 rounded-md bg-yellow-100 text-yellow-800 text-sm">Admin</Link>
               )}
 
             </>
