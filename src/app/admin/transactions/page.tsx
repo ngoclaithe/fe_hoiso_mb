@@ -90,13 +90,11 @@ export default function AdminTransactionsPage() {
         balanceAfter: t.balanceAfter,
       }));
 
-      // filter to only withdrawal and pending
+      // filter to only withdrawals
       const filtered = mapped.filter(m => {
         const typ = (m.type || '').toLowerCase();
-        const st = (m.status || '').toLowerCase();
         const isWithdraw = typ.includes('withdraw') || typ.includes('rút') || typ.includes('withdrawal');
-        const isPending = st.includes('pending') || st.includes('pend') || st.includes('chờ') || st.includes('pending');
-        return isWithdraw && isPending;
+        return isWithdraw;
       });
 
       // update pagination state
@@ -196,7 +194,7 @@ export default function AdminTransactionsPage() {
     <div className="max-w-6xl mx-auto p-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Quản lý giải ngân</h1>
-        <p className="text-gray-600">Xem và duyệt các yêu cầu rút tiền đang chờ xử lý</p>
+        <p className="text-gray-600">Xem tất cả giao dịch rút tiền và xử lý yêu cầu</p>
       </div>
 
       {loading && (
@@ -216,7 +214,7 @@ export default function AdminTransactionsPage() {
 
       {!loading && items.length === 0 ? (
         <div className="text-center py-12">
-          <div className="text-gray-400 text-lg mb-2">Không có yêu cầu rút tiền nào đang chờ duyệt</div>
+          <div className="text-gray-400 text-lg mb-2">Không có giao dịch rút tiền</div>
           <button onClick={load} className="text-blue-600 hover:text-blue-700 font-medium">
             Tải lại
           </button>
