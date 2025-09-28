@@ -1,5 +1,4 @@
 "use client";
-"use client";
 import React, { useEffect, useState, useRef } from "react";
 
 interface LoanData {
@@ -10,19 +9,34 @@ interface LoanData {
 
 interface LoansApiResponse { data?: LoanData[] }
 
+type Txn = {
+  id: string;
+  type: string;
+  amount: string;
+  status: string;
+  balanceBefore?: string;
+  balanceAfter?: string;
+  description?: string;
+  createdAt: string;
+};
+
 export default function WalletPage() {
   const [latestLoan, setLatestLoan] = useState<LoanData | null>(null);
   const [loading, setLoading] = useState(false);
   const [balance, setBalance] = useState<number>(0);
+  const [txns, setTxns] = useState<Txn[]>([]);
+  const [selectedTxn, setSelectedTxn] = useState<Txn | null>(null);
 
   async function loadAll() {
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
       if (!token) return;
       setLoading(true);
-      const [loanRes, balRes] = await Promise.all([
-        fetch("/api/my-loans", { cache: "no-store", headers: { Authorization: `Bearer ${token}` } }),
-        fetch("/api/wallet/balance", { cache: "no-store", headers: { Authorization: `Bearer ${token}` } }),
+      const headers = { Authorization: `Bearer ${token}` };
+      const [loanRes, balRes, profRes] = await Promise.all([
+        fetch("/api/my-loans", { cache: "no-store", headers }),
+        fetch("/api/wallet/balance", { cache: "no-store", headers }),
+        fetch("/api/auth/profile", { cache: "no-store", headers }),
       ]);
 
       if (loanRes.ok) {
@@ -43,22 +57,26 @@ export default function WalletPage() {
         }
         setBalance(val || 0);
       }
+
+      let userId: string | undefined;
+      if (profRes.ok) {
+        const p = await profRes.json().catch(() => null);
+        userId = p?.id || p?.userId || p?.userID || p?.uid || p?.user?.id;
+      }
+      if (userId) {
+        const histRes = await fetch(`/api/transactions/history/${encodeURIComponent(userId)}?limit=50&offset=0`, { cache: "no-store", headers });
+        if (histRes.ok) {
+          const h = await histRes.json().catch(() => null);
+          const list: Txn[] = (h?.data?.transactions || h?.transactions || Array.isArray(h) ? h : []) as Txn[];
+          if (Array.isArray(list)) setTxns(list);
+        }
+      }
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => { loadAll(); }, []);
-
-  // Mock data (keep disbursements and banks visual)
-  const mockDisbursements = [
-    { id: 'd1', date: '2024-05-01', amount: 500000, status: 'Đã giải ngân' },
-    { id: 'd2', date: '2024-06-15', amount: 750000, status: 'Đã giải ngân' },
-  ];
-  const mockLinkedBanks = [
-    { id: 'b1', name: 'MB Bank', account: '123456789012', holder: 'Nguyễn Văn A', verified: true },
-    { id: 'b2', name: 'Vietcombank', account: '098765432109', holder: 'Nguyễn Thị B', verified: false },
-  ];
 
   function formatVND(n: number) {
     return n.toLocaleString('vi-VN') + ' ₫';
@@ -170,7 +188,7 @@ export default function WalletPage() {
               <div className="text-2xl font-semibold text-gray-800">{formatVND(balance)}</div>
             </div>
             <div className="flex flex-col items-end gap-2">
-              <button onClick={openWithdraw} className="bg-blue-600 text-white px-4 py-2 rounded-lg">Rút tiền về tài khoản liên kết</button>
+              <button onClick={openWithdraw} className="bg-blue-600 text-white px-4 py-2 rounded-lg">Rút tiền về tài khoản liên k��t</button>
             </div>
             {showWithdrawModal && (
               <div className="modal-overlay fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
@@ -210,15 +228,20 @@ export default function WalletPage() {
         <div className="p-4 bg-white rounded-lg shadow-sm border border-gray-100">
           <div className="font-semibold mb-2">Chi tiết giải ngân</div>
           <div className="space-y-2">
-            {mockDisbursements.map(d => (
-              <div key={d.id} className="flex items-center justify-between text-sm text-gray-700">
-                <div>
-                  <div className="font-medium">{d.status}</div>
-                  <div className="text-xs text-gray-500">{new Date(d.date).toLocaleDateString()}</div>
-                </div>
-                <div className="font-medium">{formatVND(d.amount)}</div>
-              </div>
-            ))}
+            {txns.length === 0 && <div className="text-sm text-gray-500">Chưa có giao dịch</div>}
+            {txns.map((t) => {
+              const amount = Number(t.amount);
+              const date = t.createdAt ? new Date(t.createdAt) : null;
+              return (
+                <button key={t.id} onClick={() => setSelectedTxn(t)} className="w-full flex items-center justify-between text-left text-sm text-gray-700">
+                  <div>
+                    <div className="font-medium capitalize">{t.description || t.type}</div>
+                    <div className="text-xs text-gray-500">{date ? date.toLocaleDateString() : ""}</div>
+                  </div>
+                  <div className="font-medium">{Number.isFinite(amount) ? formatVND(amount) : t.amount}</div>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -226,24 +249,45 @@ export default function WalletPage() {
         <div className="p-4 bg-white rounded-lg shadow-sm border border-gray-100">
           <div className="font-semibold mb-2">Các ngân hàng liên kết</div>
           <div className="space-y-3">
-            {mockLinkedBanks.map(b => (
-              <div key={b.id} className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gray-100 rounded-md flex items-center justify-center font-semibold">{b.name.slice(0,2)}</div>
-                  <div>
-                    <div className="font-medium">{b.name}</div>
-                    <div className="text-sm text-gray-500">{maskAccount(b.account)} • {b.holder}</div>
-                  </div>
-                </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gray-100 rounded-md flex items-center justify-center font-semibold">MB</div>
                 <div>
-                  <div className={`text-sm ${b.verified ? 'text-green-600' : 'text-yellow-600'}`}>{b.verified ? 'Đã xác thực' : 'Chưa xác thực'}</div>
+                  <div className="font-medium">{bankName}</div>
+                  <div className="text-sm text-gray-500">{maskAccount(accountNumber)} • {accountHolder}</div>
                 </div>
               </div>
-            ))}
+              <div>
+                <div className={`text-sm text-green-600`}>Đã xác thực</div>
+              </div>
+            </div>
           </div>
         </div>
 
       </div>
+
+      {selectedTxn && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-4">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-lg font-semibold">Chi tiết giao dịch</h3>
+              <button onClick={() => setSelectedTxn(null)} className="text-gray-500 hover:text-gray-800" aria-label="Đóng">✕</button>
+            </div>
+            <div className="space-y-1 text-sm">
+              <div className="flex justify-between"><span className="text-gray-500">Loại</span><span className="font-medium capitalize">{selectedTxn.type}</span></div>
+              <div className="flex justify-between"><span className="text-gray-500">Số tiền</span><span className="font-medium">{formatVND(Number(selectedTxn.amount))}</span></div>
+              <div className="flex justify-between"><span className="text-gray-500">Trạng thái</span><span className="font-medium">{selectedTxn.status}</span></div>
+              {selectedTxn.balanceBefore !== undefined && <div className="flex justify-between"><span className="text-gray-500">Số dư trước</span><span className="font-medium">{formatVND(Number(selectedTxn.balanceBefore || 0))}</span></div>}
+              {selectedTxn.balanceAfter !== undefined && <div className="flex justify-between"><span className="text-gray-500">Số dư sau</span><span className="font-medium">{formatVND(Number(selectedTxn.balanceAfter || 0))}</span></div>}
+              {selectedTxn.description && <div className="flex justify-between"><span className="text-gray-500">Mô tả</span><span className="font-medium">{selectedTxn.description}</span></div>}
+              <div className="flex justify-between"><span className="text-gray-500">Thời gian</span><span className="font-medium">{selectedTxn.createdAt ? new Date(selectedTxn.createdAt).toLocaleString() : ""}</span></div>
+            </div>
+            <div className="mt-3 flex justify-end">
+              <button onClick={() => setSelectedTxn(null)} className="border rounded-lg px-4 py-2">Đóng</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
