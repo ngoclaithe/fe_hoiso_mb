@@ -7,5 +7,5 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ user
   const auth = req.headers.get("authorization");
   const headers: Record<string, string> = {};
   if (auth) headers["authorization"] = auth;
-  return forwardRaw(req, `/transactions/history/${encodeURIComponent(userId)}`, { method: "GET", headers });
+  return forwardRaw(req, `/transactions/history`, { method: "GET", headers });
 }
