@@ -84,10 +84,17 @@ export default function WalletPage() {
       const userId = profile?.id || profile?._id || profile?.userId || profile?.uuid;
       if (!userId) throw new Error("Không xác định được userId");
 
-      const res = await fetch(`/api/transactions/withdraw/${encodeURIComponent(String(userId))}`, {
+      const payload = {
+        userId: String(userId),
+        amount,
+        description: "Rút tiền từ ví",
+        referenceId: `WD_${Date.now()}`,
+      };
+
+      const res = await fetch(`/api/transactions/withdraw`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ amount }),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) {
         const t = await res.text().catch(() => "");
@@ -149,7 +156,7 @@ export default function WalletPage() {
               <div className="text-2xl font-semibold text-gray-800">{formatVND(balance)}</div>
             </div>
             <div className="flex flex-col items-end gap-2">
-              <button onClick={handleWithdraw} className="bg-blue-600 text-white px-4 py-2 rounded-lg">Rút tiền về tài khoản liên kết</button>
+              <button onClick={handleWithdraw} className="bg-blue-600 text-white px-4 py-2 rounded-lg">Rút tiền v��� tài khoản liên kết</button>
             </div>
           </div>
         </div>
