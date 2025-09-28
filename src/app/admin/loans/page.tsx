@@ -41,23 +41,23 @@ export default function AdminLoansPage() {
 
   // Pagination state
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState<number | null>(null);
   const [hasMore, setHasMore] = useState(false);
 
-  const totalPages = useMemo(() => total && total > 0 ? Math.max(1, Math.ceil(total / limit)) : null, [total, limit]);
+  const totalPages = useMemo(() => total && total > 0 ? Math.max(1, Math.ceil(total / pageSize)) : null, [total, pageSize]);
 
-  async function load(targetPage = page, targetLimit = limit) {
+  async function load(targetPage = page, targetPageSize = pageSize) {
     setLoading(true);
     setError(null);
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
       const qs = new URLSearchParams({
         page: String(targetPage),
-        limit: String(targetLimit),
+        limit: String(targetPageSize),
       }).toString();
       
-      const res = await fetch(`/api/v1/loans?${qs}`, {
+      const res = await fetch(`/api/admin/loans?${qs}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         cache: "no-store",
       });
@@ -78,17 +78,17 @@ export default function AdminLoansPage() {
         
         // Use backend's totalPages if available, otherwise calculate
         const backendTotalPages = body.totalPages;
-        const calculatedPages = typeof t === "number" ? Math.max(1, Math.ceil(t / targetLimit)) : null;
+        const calculatedPages = typeof t === "number" ? Math.max(1, Math.ceil(t / targetPageSize)) : null;
         const pages = backendTotalPages || calculatedPages;
         
         if (pages) {
           setHasMore(targetPage < pages);
         } else {
-          setHasMore(items.length >= targetLimit);
+          setHasMore(items.length >= targetPageSize);
         }
       } else {
         setTotal(null);
-        setHasMore(items.length >= targetLimit);
+        setHasMore(items.length >= targetPageSize);
       }
     } catch (e: unknown) {
       const errorMessage = e instanceof Error ? e.message : "Lỗi tải danh sách";
@@ -99,13 +99,13 @@ export default function AdminLoansPage() {
   }
 
   useEffect(() => { 
-    load(page, limit); 
-  }, [page, limit]);
+    load(page, pageSize); 
+  }, [page, pageSize]);
 
   async function updateStatus(id: string, status: string) {
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      const res = await fetch(`/api/v1/loans/${encodeURIComponent(id)}`, {
+      const res = await fetch(`/api/admin/loans?id=${encodeURIComponent(id)}` , {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -117,7 +117,7 @@ export default function AdminLoansPage() {
         const t = await res.text().catch(() => "");
         throw new Error(t || `Error ${res.status}`);
       }
-      await load(page, limit);
+      await load(page, pageSize);
     } catch (e: unknown) {
       const errorMessage = e instanceof Error ? e.message : "Không thể cập nhật";
       alert(errorMessage);
@@ -127,12 +127,12 @@ export default function AdminLoansPage() {
   async function approveLoan(id: string) {
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      const res = await fetch(`/api/v1/loans/${encodeURIComponent(id)}/approve`, {
+      const res = await fetch(`/api/loans/${encodeURIComponent(id)}/approve`, {
         method: "PATCH",
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
       if (!res.ok) throw new Error(await res.text().catch(() => "Phê duyệt thất bại"));
-      await load(page, limit);
+      await load(page, pageSize);
     } catch (e: unknown) {
       alert(e instanceof Error ? e.message : "Lỗi");
     }
@@ -142,12 +142,12 @@ export default function AdminLoansPage() {
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
     
-      const res = await fetch(`/api/v1/loans/${encodeURIComponent(id)}/complete`, {
+      const res = await fetch(`/api/loans/${encodeURIComponent(id)}/complete`, {
         method: "PATCH",
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
       if (!res.ok) throw new Error(await res.text().catch(() => "Hoàn tất thất bại"));
-      await load(page, limit);
+      await load(page, pageSize);
     } catch (e: unknown) {
       alert(e instanceof Error ? e.message : "Lỗi");
     }
@@ -207,8 +207,8 @@ export default function AdminLoansPage() {
         <div className="flex items-center gap-2">
           <label className="text-sm text-gray-600">/trang</label>
           <select
-            value={limit}
-            onChange={(e) => { setPage(1); setLimit(Number(e.target.value)); }}
+            value={pageSize}
+            onChange={(e) => { setPage(1); setPageSize(Number(e.target.value)); }}
             className="border rounded-md px-2 py-1 text-sm bg-white"
             aria-label="Số dòng mỗi trang"
           >
