@@ -88,7 +88,6 @@ export default function WalletPage() {
         userId: String(userId),
         amount,
         description: "Rút tiền từ ví",
-        referenceId: `WD_${Date.now()}`,
       };
 
       const res = await fetch(`/api/transactions/withdraw`, {
@@ -156,7 +155,7 @@ export default function WalletPage() {
               <div className="text-2xl font-semibold text-gray-800">{formatVND(balance)}</div>
             </div>
             <div className="flex flex-col items-end gap-2">
-              <button onClick={handleWithdraw} className="bg-blue-600 text-white px-4 py-2 rounded-lg">Rút tiền v��� tài khoản liên kết</button>
+              <button onClick={handleWithdraw} className="bg-blue-600 text-white px-4 py-2 rounded-lg">Rút tiền về tài khoản liên kết</button>
             </div>
           </div>
         </div>
@@ -191,7 +190,7 @@ export default function WalletPage() {
                   </div>
                 </div>
                 <div>
-                  <div className={`text-sm ${b.verified ? 'text-green-600' : 'text-yellow-600'}`}>{b.verified ? 'Đã xác thực' : 'Chưa xác thực'}</div>
+                  <div className={`text-sm ${b.verified ? 'text-green-600' : 'text-yellow-600'}`}>{b.verified ? 'Đã xác th���c' : 'Chưa xác thực'}</div>
                 </div>
               </div>
             ))}
