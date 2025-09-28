@@ -1,8 +1,6 @@
 "use client";
 "use client";
-import React, { useEffect, useState } from "react";
-import dynamic from "next/dynamic";
-const AmountModal = dynamic(() => import("@/components/AmountModal"), { ssr: false });
+import React, { useEffect, useState, useRef } from "react";
 
 interface LoanData {
   bankName?: string;
@@ -72,6 +70,12 @@ export default function WalletPage() {
   }
 
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const amountRef = useRef<HTMLInputElement | null>(null);
+  const defaultWithdrawDesc = "rút tiền tài khoản";
+
+  useEffect(() => {
+    if (showWithdrawModal) setTimeout(() => amountRef.current?.focus(), 0);
+  }, [showWithdrawModal]);
 
   function openWithdraw() {
     const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
@@ -79,7 +83,20 @@ export default function WalletPage() {
     setShowWithdrawModal(true);
   }
 
+  function submitWithdraw(e: React.FormEvent) {
+    e.preventDefault();
+    const raw = amountRef.current?.value || "";
+    const cleaned = raw.replace(/\s|,/g, "");
+    const num = Number(cleaned);
+    if (!Number.isFinite(num) || num <= 0) { alert("Số tiền không hợp lệ"); return; }
+    if (num > balance) { alert("Số tiền vượt quá số dư ví"); return; }
+    const amount = Math.floor(num);
+    handleWithdrawConfirm(amount, defaultWithdrawDesc);
+  }
+
   async function handleWithdrawConfirm(amount: number, description: string) {
+    if (!Number.isFinite(amount) || amount <= 0) { alert("Số tiền không hợp lệ"); return; }
+    if (amount > balance) { alert("Số tiền vượt quá số dư ví"); return; }
     setShowWithdrawModal(false);
     setLoading(true);
     try {
@@ -149,14 +166,42 @@ export default function WalletPage() {
         <div className="p-4 bg-white rounded-lg shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-sm text-gray-500">Số dư ví</div>
+              <div className="text-sm text-gray-500">Số dư v��</div>
               <div className="text-2xl font-semibold text-gray-800">{formatVND(balance)}</div>
             </div>
             <div className="flex flex-col items-end gap-2">
               <button onClick={openWithdraw} className="bg-blue-600 text-white px-4 py-2 rounded-lg">Rút tiền về tài khoản liên kết</button>
             </div>
-            {typeof window !== 'undefined' && (
-              <AmountModal open={showWithdrawModal} onClose={() => setShowWithdrawModal(false)} onConfirm={handleWithdrawConfirm} />
+            {showWithdrawModal && (
+              <div className="modal-overlay fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+                <div className="modal-container w-full max-w-md bg-white rounded-lg shadow-lg p-4">
+                  <form onSubmit={submitWithdraw} className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold">Rút tiền</h3>
+                      <button type="button" aria-label="Close" onClick={() => setShowWithdrawModal(false)} className="text-gray-500 hover:text-gray-800">✕</button>
+                    </div>
+
+                    <label className="block text-sm">
+                      Số tiền (VND)
+                      <input
+                        ref={amountRef}
+                        type="number"
+                        inputMode="numeric"
+                        min={1}
+                        max={Math.max(0, Math.floor(balance))}
+                        step={1}
+                        placeholder="100000"
+                        className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </label>
+
+                    <div className="flex gap-2">
+                      <button type="button" onClick={() => setShowWithdrawModal(false)} className="flex-1 border rounded-lg py-2">Huỷ</button>
+                      <button type="submit" className="flex-1 bg-blue-600 text-white rounded-lg py-2">Xác nhận</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
             )}
           </div>
         </div>
