@@ -133,15 +133,15 @@ export default function AdminLoansPage() {
               </div>
             </div>
             <div className="mt-3 flex gap-2">
-              <button onClick={() => updateStatus(l.id, "approved")} className="flex-1 bg-green-600 text-white py-2 rounded-lg">Phê duyệt</button>
-              <button onClick={() => updateStatus(l.id, "rejected")} className="flex-1 border py-2 rounded-lg">Từ chối</button>
-            </div>
-            <div className="mt-2 flex gap-2">
-              {String(l.status || '').toLowerCase() === 'approved' && (
-                <button onClick={() => activateLoan(l.id)} className="flex-1 bg-blue-600 text-white py-2 rounded-lg">Kích hoạt</button>
+              {String(l.status || '').toLowerCase() === 'pending' && (
+                <>
+                  <button onClick={() => updateStatus(l.id, "approved")} className="flex-1 bg-green-600 text-white py-2 rounded-lg">Phê duyệt</button>
+                  <button onClick={() => updateStatus(l.id, "rejected")} className="flex-1 border py-2 rounded-lg">Từ chối</button>
+                </>
               )}
-              {String(l.status || '').toLowerCase() === 'active' && (
-                <button onClick={() => completeLoan(l.id)} className="flex-1 bg-indigo-600 text-white py-2 rounded-lg">Hoàn tất</button>
+
+              {(String(l.status || '').toLowerCase() === 'approved' || String(l.status || '').toLowerCase() === 'active') && (
+                <button onClick={() => completeLoan(l.id)} className="flex-1 bg-indigo-600 text-white py-2 rounded-lg">Tất toán</button>
               )}
             </div>
           </div>
