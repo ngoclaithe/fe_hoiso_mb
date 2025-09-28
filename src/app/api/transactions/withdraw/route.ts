@@ -5,6 +5,8 @@ export async function POST(req: NextRequest) {
   const auth = req.headers.get("authorization");
   const headers: Record<string, string> = {};
   if (auth) headers["authorization"] = auth;
+  const incomingCT = req.headers.get("content-type");
+  if (incomingCT) headers["content-type"] = incomingCT;
 
   const body = await req.json().catch(() => null);
   if (!body || typeof body !== "object") return new Response(JSON.stringify({ message: "Missing body" }), { status: 400 });
