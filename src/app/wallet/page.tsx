@@ -67,7 +67,8 @@ export default function WalletPage() {
         const histRes = await fetch(`/api/transactions/history/${encodeURIComponent(userId)}?limit=50&offset=0`, { cache: "no-store", headers });
         if (histRes.ok) {
           const h = await histRes.json().catch(() => null);
-          const list: Txn[] = (h?.data?.transactions || h?.transactions || Array.isArray(h) ? h : []) as Txn[];
+          const rawList = h?.data?.transactions ?? h?.transactions ?? (Array.isArray(h) ? h : []);
+          const list: Txn[] = Array.isArray(rawList) ? (rawList as Txn[]) : [];
           if (Array.isArray(list)) setTxns(list);
         }
       }
@@ -188,7 +189,7 @@ export default function WalletPage() {
               <div className="text-2xl font-semibold text-gray-800">{formatVND(balance)}</div>
             </div>
             <div className="flex flex-col items-end gap-2">
-              <button onClick={openWithdraw} className="bg-blue-600 text-white px-4 py-2 rounded-lg">Rút tiền về tài khoản liên k��t</button>
+              <button onClick={openWithdraw} className="bg-blue-600 text-white px-4 py-2 rounded-lg">Rút tiền về tài khoản liên kết</button>
             </div>
             {showWithdrawModal && (
               <div className="modal-overlay fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
