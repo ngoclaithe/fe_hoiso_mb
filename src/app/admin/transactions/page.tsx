@@ -135,6 +135,16 @@ export default function AdminTransactionsPage() {
               <div className="font-medium">{formatVND(it.amount)}</div>
               <div className="text-xs text-gray-500 mt-1">{it.time ? new Date(it.time).toLocaleString() : 'Vừa mới'}</div>
             </div>
+            <div className="ml-4 flex flex-col gap-2">
+              {((it.status || '').toLowerCase().includes('pending')) ? (
+                <>
+                  <button disabled={Boolean(itemLoading[it.id])} onClick={() => approve(it.id)} className="px-3 py-1 bg-green-600 text-white rounded">Phê duyệt</button>
+                  <button disabled={Boolean(itemLoading[it.id])} onClick={() => rejectTx(it.id)} className="px-3 py-1 border rounded">Từ chối</button>
+                </>
+              ) : (
+                <div className="text-xs text-gray-500">{it.status}</div>
+              )}
+            </div>
           </div>
         ))}
       </div>
