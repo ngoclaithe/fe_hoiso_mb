@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-interface RawNotification { [key: string]: any }
+type RawNotification = Record<string, unknown>;
 interface NotificationItem {
   id: string;
   text: string;
