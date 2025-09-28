@@ -1,6 +1,8 @@
 "use client";
 "use client";
 import React, { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+const AmountModal = dynamic(() => import("@/components/AmountModal"), { ssr: false });
 
 interface LoanData {
   bankName?: string;
@@ -76,7 +78,7 @@ export default function WalletPage() {
       const amountStr = prompt("Nhập số tiền muốn rút (VND)", "100000");
       if (!amountStr) return;
       const amount = Number(amountStr);
-      if (!Number.isFinite(amount) || amount <= 0) return alert("Số tiền không hợp lệ");
+      if (!Number.isFinite(amount) || amount <= 0) return alert("Số tiền không hợp l��");
 
       // Backend now expects only amount and description in body
       const safeAmount = Math.round(amount * 100) / 100;
