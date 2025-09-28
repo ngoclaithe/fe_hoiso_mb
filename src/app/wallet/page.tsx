@@ -1,5 +1,8 @@
 "use client";
-import { useEffect, useState } from "react";
+"use client";
+import React, { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+const AmountModal = dynamic(() => import("@/components/AmountModal"), { ssr: false });
 
 interface LoanData {
   bankName?: string;
@@ -31,7 +34,15 @@ export default function WalletPage() {
       }
       if (balRes.ok) {
         const b = await balRes.json().catch(() => null);
-        const val = typeof b === 'number' ? b : (typeof b?.balance === 'number' ? b.balance : 0);
+        let val = 0;
+        if (typeof b === 'number') {
+          val = b;
+        } else if (b && typeof b.balance === 'number') {
+          val = b.balance;
+        } else if (b && typeof b.balance === 'string') {
+          const parsed = Number(b.balance);
+          val = Number.isFinite(parsed) ? parsed : 0;
+        }
         setBalance(val || 0);
       }
     } finally {
@@ -60,18 +71,25 @@ export default function WalletPage() {
     return '**** ' + a.slice(-4);
   }
 
-  async function handleWithdraw() {
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+
+  function openWithdraw() {
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    if (!token) return alert("Bạn cần đăng nhập");
+    setShowWithdrawModal(true);
+  }
+
+  async function handleWithdrawConfirm(amount: number, description: string) {
+    setShowWithdrawModal(false);
+    setLoading(true);
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
       if (!token) return alert("Bạn cần đăng nhập");
-      const amountStr = prompt("Nhập số tiền muốn rút (VND)", "100000");
-      if (!amountStr) return;
-      const amount = Number(amountStr);
-      if (!Number.isFinite(amount) || amount <= 0) return alert("Số tiền không hợp lệ");
-      const res = await fetch("/api/wallet/withdraw", {
+      const payload = { amount, description };
+      const res = await fetch(`/api/transactions/withdraw`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ amount }),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) {
         const t = await res.text().catch(() => "");
@@ -82,31 +100,8 @@ export default function WalletPage() {
     } catch (e: unknown) {
       const m = e instanceof Error ? e.message : "Lỗi";
       alert(m);
-    }
-  }
-
-  async function handleAddBalance() {
-    try {
-      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      if (!token) return alert("Bạn cần đăng nhập");
-      const amountStr = prompt("Nhập số tiền muốn nạp (VND)", "100000");
-      if (!amountStr) return;
-      const amount = Number(amountStr);
-      if (!Number.isFinite(amount) || amount <= 0) return alert("Số tiền không hợp lệ");
-      const res = await fetch("/api/wallet/add-balance", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ amount }),
-      });
-      if (!res.ok) {
-        const t = await res.text().catch(() => "");
-        throw new Error(t || "Nạp tiền thất bại");
-      }
-      await loadAll();
-      alert("Đã nạp tiền vào ví");
-    } catch (e: unknown) {
-      const m = e instanceof Error ? e.message : "Lỗi";
-      alert(m);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -158,9 +153,11 @@ export default function WalletPage() {
               <div className="text-2xl font-semibold text-gray-800">{formatVND(balance)}</div>
             </div>
             <div className="flex flex-col items-end gap-2">
-              <button onClick={handleWithdraw} className="bg-blue-600 text-white px-4 py-2 rounded-lg">Rút tiền về tài khoản liên kết</button>
-              <button onClick={handleAddBalance} className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg">Nạp tiền</button>
+              <button onClick={openWithdraw} className="bg-blue-600 text-white px-4 py-2 rounded-lg">Rút tiền về tài khoản liên kết</button>
             </div>
+            {typeof window !== 'undefined' && (
+              <AmountModal open={showWithdrawModal} onClose={() => setShowWithdrawModal(false)} onConfirm={handleWithdrawConfirm} />
+            )}
           </div>
         </div>
 

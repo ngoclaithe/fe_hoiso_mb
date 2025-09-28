@@ -40,7 +40,7 @@ export async function forwardRaw(
     } else {
       try {
         body = await req.text();
-      } catch (err) {
+      } catch {
         // If body already consumed, leave undefined. Caller should provide bodyText to avoid this.
         body = undefined;
       }
