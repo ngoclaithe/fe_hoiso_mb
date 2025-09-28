@@ -76,14 +76,14 @@ export default function AdminLoansPage() {
     }
   }
 
-  async function activateLoan(id: string) {
+  async function approveLoan(id: string) {
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      const res = await fetch(`/api/loans/${encodeURIComponent(id)}/activate`, {
+      const res = await fetch(`/api/loans/${encodeURIComponent(id)}/approved`, {
         method: "PATCH",
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
-      if (!res.ok) throw new Error(await res.text().catch(() => "Kích hoạt thất bại"));
+      if (!res.ok) throw new Error(await res.text().catch(() => "Phê duyệt thất bại"));
       await load();
     } catch (e: unknown) {
       alert(e instanceof Error ? e.message : "Lỗi");
