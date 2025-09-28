@@ -16,8 +16,10 @@ function buildHeaders(req: NextRequest, contentType?: string) {
 }
 
 export async function GET(req: NextRequest) {
-  // Admin: list all loans
-  return forwardRaw(req, "/loans", { method: "GET", headers: buildHeaders(req) });
+  // Admin: list all loans with query forwarding (pagination, filters)
+  const url = new URL(req.url);
+  const search = url.search || "";
+  return forwardRaw(req, `/loans${search}`, { method: "GET", headers: buildHeaders(req) });
 }
 
 export async function PATCH(req: NextRequest) {
