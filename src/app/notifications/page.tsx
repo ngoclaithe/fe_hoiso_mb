@@ -99,7 +99,7 @@ export default function NotificationsPage() {
   return (
     <div>
       <div className="bg-blue-600 text-white px-4 py-3 flex items-center justify-between">
-        <button onClick={() => router.push('/home')} className="text-white">&lt;</button>
+        {/* <button onClick={() => router.push('/home')} className="text-white">&lt;</button> */}
         <div className="font-semibold">Thông báo</div>
         <button onClick={markAllRead} className="px-2 py-1 rounded bg-white/10 text-white text-xs">Đánh dấu tất cả</button>
       </div>
