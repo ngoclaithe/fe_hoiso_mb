@@ -40,7 +40,7 @@ export default function ProfilePage() {
     <div>
       <div className="bg-blue-600 text-white px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button onClick={() => router.push('/home')} className="text-white">&lt;</button>
+          {/* <button onClick={() => router.push('/home')} className="text-white">&lt;</button> */}
           <div className="font-semibold">Hồ sơ cá nhân</div>
         </div>
 
