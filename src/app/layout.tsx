@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Đăng ký hồ sơ vay",
-  description: "Webapp đăng ký hồ sơ vay vốn dạng mobile",
+  description: "Website đăng ký hồ sơ vay tiền",
 };
 
 export default function RootLayout({
