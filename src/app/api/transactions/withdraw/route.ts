@@ -31,5 +31,8 @@ export async function POST(req: NextRequest) {
 
   const forwardBody = { ...body, amount: amountNum };
 
+  // Log the normalized body for debugging (server logs)
+  try { console.log("Forwarding withdraw body:", JSON.stringify(forwardBody)); } catch {}
+
   return forwardRaw(req, "/transactions/withdraw", { method: "POST", includeBody: true, bodyText: JSON.stringify(forwardBody), headers });
 }
