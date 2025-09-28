@@ -117,6 +117,42 @@ export default function AdminTransactionsPage() {
     return n.toLocaleString('vi-VN') + ' ₫';
   }
 
+  async function approve(id: string) {
+    if (!confirm('Phê duyệt lệnh rút tiền này?')) return;
+    setItemLoading(prev => ({ ...prev, [id]: true }));
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const res = await fetch(`/api/v1/transactions/admin/withdraw/${encodeURIComponent(id)}/approve`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+      if (!res.ok) throw new Error(await res.text().catch(() => 'Phê duyệt thất bại'));
+      await load();
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : 'Lỗi');
+    } finally {
+      setItemLoading(prev => ({ ...prev, [id]: false }));
+    }
+  }
+
+  async function rejectTx(id: string) {
+    if (!confirm('Từ chối lệnh rút tiền này?')) return;
+    setItemLoading(prev => ({ ...prev, [id]: true }));
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const res = await fetch(`/api/v1/transactions/admin/withdraw/${encodeURIComponent(id)}/reject`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+      if (!res.ok) throw new Error(await res.text().catch(() => 'Từ chối thất bại'));
+      await load();
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : 'Lỗi');
+    } finally {
+      setItemLoading(prev => ({ ...prev, [id]: false }));
+    }
+  }
+
   return (
     <div>
       <h1 className="text-lg font-semibold mb-3">Quản lý giải ngân</h1>
