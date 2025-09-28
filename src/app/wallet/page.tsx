@@ -71,22 +71,21 @@ export default function WalletPage() {
     return '**** ' + a.slice(-4);
   }
 
-  async function handleWithdraw() {
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+
+  function openWithdraw() {
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    if (!token) return alert("Bạn cần đăng nhập");
+    setShowWithdrawModal(true);
+  }
+
+  async function handleWithdrawConfirm(amount: number, description: string) {
+    setShowWithdrawModal(false);
+    setLoading(true);
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
       if (!token) return alert("Bạn cần đăng nhập");
-      const amountStr = prompt("Nhập số tiền muốn rút (VND)", "100000");
-      if (!amountStr) return;
-      const amount = Number(amountStr);
-      if (!Number.isFinite(amount) || amount <= 0) return alert("Số tiền không hợp l��");
-
-      // Backend now expects only amount and description in body
-      const safeAmount = Math.round(amount * 100) / 100;
-      const payload = {
-        amount: safeAmount,
-        description: "Rút tiền từ ví",
-      };
-
+      const payload = { amount, description };
       const res = await fetch(`/api/transactions/withdraw`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -101,6 +100,8 @@ export default function WalletPage() {
     } catch (e: unknown) {
       const m = e instanceof Error ? e.message : "Lỗi";
       alert(m);
+    } finally {
+      setLoading(false);
     }
   }
 
