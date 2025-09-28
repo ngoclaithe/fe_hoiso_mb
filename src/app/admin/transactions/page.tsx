@@ -41,6 +41,7 @@ export default function AdminTransactionsPage() {
   const [offset, setOffset] = useState(0);
   const [total, setTotal] = useState<number | null>(null);
   const [hasMore, setHasMore] = useState<boolean>(false);
+  const [itemLoading, setItemLoading] = useState<Record<string, boolean>>({});
 
   async function load() {
     setLoading(true);
