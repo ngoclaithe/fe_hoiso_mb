@@ -73,13 +73,13 @@ export default function HistoryPage() {
   function openContractForLoan(l: LoanHistory) {
     // Prefill contract fields from loan when available
     setContractData(prev => ({
-      borrowerName: (l as any).borrowerName || (l as any).name || prev.borrowerName,
-      borrowerCCCD: (l as any).cccd || prev.borrowerCCCD,
+      borrowerName: l.borrowerName || l.name || prev.borrowerName,
+      borrowerCCCD: l.cccd || prev.borrowerCCCD,
       signedAt: (l.createdAt || l.created_at) ? new Date(l.createdAt || l.created_at || Date.now()).toISOString().slice(0,16) : prev.signedAt,
       amount: String(l.loanAmount || l.loan_amount || prev.amount),
-      code: (l as any).contractCode || prev.code,
+      code: l.contractCode || prev.code,
       term: String(l.loanTermMonths || l.loan_term_months || prev.term),
-      interest: (l as any).interest || prev.interest,
+      interest: l.interest || prev.interest,
       signatureB: prev.signatureB,
     }));
     setShowContract(true);
