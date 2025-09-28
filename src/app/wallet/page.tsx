@@ -77,22 +77,9 @@ export default function WalletPage() {
       const amount = Number(amountStr);
       if (!Number.isFinite(amount) || amount <= 0) return alert("Số tiền không hợp lệ");
 
-      // Fetch profile to obtain userId (robust to different field shapes)
-      const profileRes = await fetch("/api/auth/profile", { cache: "no-store", headers: { Authorization: `Bearer ${token}` } });
-      if (!profileRes.ok) throw new Error("Không lấy được thông tin người dùng");
-      const profile = await profileRes.json().catch(() => ({} as any));
-      const userId = (
-        profile?.userId || profile?.id || profile?._id || profile?.uuid ||
-        profile?.data?.userId || profile?.data?.id || profile?.data?._id ||
-        profile?.user?.userId || profile?.user?.id || profile?.user?._id
-      );
-      if (!userId) throw new Error("Không xác định được userId. Kiểm tra /api/auth/profile trả về gì.");
-
-      // Ensure amount has at most 2 decimal places (backend validation)
+      // Backend now expects only amount and description in body
       const safeAmount = Math.round(amount * 100) / 100;
-
       const payload = {
-        userId: String(userId),
         amount: safeAmount,
         description: "Rút tiền từ ví",
       };
