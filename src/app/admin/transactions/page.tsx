@@ -51,9 +51,17 @@ export default function AdminTransactionsPage() {
       });
       if (!res.ok) throw new Error(await res.text().catch(() => `Lỗi ${res.status}`));
       const data = await res.json().catch(() => []);
-      const arr: RawTx[] = Array.isArray(data) ? data : (data?.data || []);
 
-      const mapped = arr.map((t) => ({
+      // Normalize transaction array from various backend shapes
+      let txArr: RawTx[] = [];
+      if (Array.isArray(data)) txArr = data;
+      else if (Array.isArray(data.transactions)) txArr = data.transactions;
+      else if (data && Array.isArray(data.data)) txArr = data.data;
+      else if (data && data.data && Array.isArray(data.data.transactions)) txArr = data.data.transactions;
+      else if (data && data.transactions && Array.isArray(data.transactions)) txArr = data.transactions;
+      else txArr = [];
+
+      const mapped = txArr.map((t) => ({
         id: detectId(t),
         amount: detectAmount(t),
         status: (detectStatus(t) || '').toString(),
