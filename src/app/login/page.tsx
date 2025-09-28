@@ -62,7 +62,7 @@ export default function LoginPage() {
           if (profileRes.ok) {
             const profile: UserProfile = await profileRes.json().catch(() => null);
             if (profile?.role === 'admin') {
-              router.replace('/admin/dashboard');
+              router.replace('/admin/users');
               return;
             }
           }

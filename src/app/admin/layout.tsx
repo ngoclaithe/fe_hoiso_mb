@@ -1,5 +1,5 @@
 import React from "react";
-import Header from "@/components/Header";
+import AdminShell from "@/components/AdminShell";
 
 export const metadata = {
   title: 'Admin - Quản trị',
@@ -8,9 +8,10 @@ export const metadata = {
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      <Header />
       <main className="w-full max-w-6xl mx-auto min-h-screen p-6">
-        {children}
+        <AdminShell>
+          {children}
+        </AdminShell>
       </main>
     </div>
   );
