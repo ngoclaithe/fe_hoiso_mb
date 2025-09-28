@@ -11,11 +11,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {open && <div className="font-semibold">Quản trị</div>}
             <button aria-label="Toggle sidebar" onClick={() => setOpen(!open)} className="text-sm px-2 py-1 rounded hover:bg-gray-100">☰</button>
           </div>
-          <nav className="space-y-2 text-sm">
-            <a href="/admin/users" className="block px-3 py-2 rounded hover:bg-blue-50">Quản lý người dùng</a>
-            <a href="/admin/loans" className="block px-3 py-2 rounded hover:bg-blue-50">Quản lý hồ sơ vay</a>
-            <a href="/admin/transactions" className="block px-3 py-2 rounded hover:bg-blue-50">Quản lý giải ngân</a>
-          </nav>
+          {open && (
+            <nav className="space-y-2 text-sm">
+              <a href="/admin/users" className="block px-3 py-2 rounded hover:bg-blue-50">Quản lý người dùng</a>
+              <a href="/admin/loans" className="block px-3 py-2 rounded hover:bg-blue-50">Quản lý hồ sơ vay</a>
+              <a href="/admin/transactions" className="block px-3 py-2 rounded hover:bg-blue-50">Quản lý giải ngân</a>
+            </nav>
+          )}
         </aside>
 
         <main className="flex-1 p-4">{children}</main>
