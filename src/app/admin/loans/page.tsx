@@ -79,7 +79,7 @@ export default function AdminLoansPage() {
   async function approveLoan(id: string) {
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      const res = await fetch(`/api/loans/${encodeURIComponent(id)}/approved`, {
+      const res = await fetch(`/api/loans/${encodeURIComponent(id)}/approve`, {
         method: "PATCH",
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });

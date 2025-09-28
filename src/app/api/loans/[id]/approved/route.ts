@@ -7,5 +7,5 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const auth = req.headers.get("authorization");
   const headers: Record<string, string> = {};
   if (auth) headers["authorization"] = auth;
-  return forwardRaw(req, `/loans/${encodeURIComponent(id)}/approved`, { method: "PATCH", headers });
+  return forwardRaw(req, `/loans/${encodeURIComponent(id)}/approve`, { method: "PATCH", headers });
 }
