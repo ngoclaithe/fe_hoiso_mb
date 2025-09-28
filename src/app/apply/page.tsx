@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState, useRef, useEffect } from "react";
+import React, { useMemo, useState, useRef, useEffect } from "react";
 import { calcMonthlyInstallment, formatCurrencyVND, Gender, VN_BANKS, todayISO } from "@/lib/loan";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -104,7 +104,7 @@ export default function ApplyPage() {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  function onSignaturePointerDown(e: any) {
+  function onSignaturePointerDown(e: React.PointerEvent<HTMLCanvasElement>) {
     const ctx = getCanvasCtx();
     if (!ctx) return;
     setSigning(true);
@@ -120,7 +120,7 @@ export default function ApplyPage() {
     try { e.currentTarget.setPointerCapture(e.pointerId); } catch {}
   }
 
-  function onSignaturePointerMove(e: any) {
+  function onSignaturePointerMove(e: React.PointerEvent<HTMLCanvasElement>) {
     if (!signing) return;
     const ctx = getCanvasCtx();
     if (!ctx) return;
@@ -131,7 +131,7 @@ export default function ApplyPage() {
     ctx.stroke();
   }
 
-  function onSignaturePointerUp(e: any) {
+  function onSignaturePointerUp(e: React.PointerEvent<HTMLCanvasElement>) {
     setSigning(false);
     try { e.currentTarget.releasePointerCapture(e.pointerId); } catch {}
   }
