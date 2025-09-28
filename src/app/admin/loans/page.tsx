@@ -135,7 +135,7 @@ export default function AdminLoansPage() {
             <div className="mt-3 flex gap-2">
               {String(l.status || '').toLowerCase() === 'pending' && (
                 <>
-                  <button onClick={() => updateStatus(l.id, "approved")} className="flex-1 bg-green-600 text-white py-2 rounded-lg">Phê duyệt</button>
+                  <button onClick={() => approveLoan(l.id)} className="flex-1 bg-green-600 text-white py-2 rounded-lg">Phê duyệt</button>
                   <button onClick={() => updateStatus(l.id, "rejected")} className="flex-1 border py-2 rounded-lg">Từ chối</button>
                 </>
               )}
