@@ -24,7 +24,7 @@ export function publicApiUrl(path: string): string {
 export async function forwardRaw(
   req: NextRequest,
   path: string,
-  init?: RequestInit & { method?: string; includeBody?: boolean }
+  init?: RequestInit & { method?: string; includeBody?: boolean; bodyText?: string }
 ): Promise<Response> {
   const url = apiUrl(path);
   const headers: HeadersInit = {
@@ -34,7 +34,17 @@ export async function forwardRaw(
 
   let body: BodyInit | undefined = undefined;
   if (init?.includeBody) {
-    body = await req.text();
+    // Prefer caller-provided bodyText (already read), otherwise read from request.
+    if (typeof init.bodyText === "string") {
+      body = init.bodyText;
+    } else {
+      try {
+        body = await req.text();
+      } catch (err) {
+        // If body already consumed, leave undefined. Caller should provide bodyText to avoid this.
+        body = undefined;
+      }
+    }
   }
 
   const res = await fetch(url, {

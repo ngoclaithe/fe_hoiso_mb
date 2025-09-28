@@ -59,9 +59,9 @@ export default function AdminLoansPage() {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
       const res = await fetch(`/api/admin/loans?id=${encodeURIComponent(id)}`, {
         method: "PATCH",
-        headers: { 
-          "Content-Type": "application/json", 
-          ...(token ? { Authorization: `Bearer ${token}` } : {}) 
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
         },
         body: JSON.stringify({ status }),
       });
@@ -73,6 +73,34 @@ export default function AdminLoansPage() {
     } catch (e: unknown) {
       const errorMessage = e instanceof Error ? e.message : "Không thể cập nhật";
       alert(errorMessage);
+    }
+  }
+
+  async function approveLoan(id: string) {
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      const res = await fetch(`/api/loans/${encodeURIComponent(id)}/approve`, {
+        method: "PATCH",
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+      if (!res.ok) throw new Error(await res.text().catch(() => "Phê duyệt thất bại"));
+      await load();
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : "Lỗi");
+    }
+  }
+
+  async function completeLoan(id: string) {
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      const res = await fetch(`/api/loans/${encodeURIComponent(id)}/complete`, {
+        method: "PATCH",
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+      if (!res.ok) throw new Error(await res.text().catch(() => "Hoàn tất thất bại"));
+      await load();
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : "Lỗi");
     }
   }
 
@@ -105,8 +133,16 @@ export default function AdminLoansPage() {
               </div>
             </div>
             <div className="mt-3 flex gap-2">
-              <button onClick={() => updateStatus(l.id, "approved")} className="flex-1 bg-green-600 text-white py-2 rounded-lg">Phê duyệt</button>
-              <button onClick={() => updateStatus(l.id, "rejected")} className="flex-1 border py-2 rounded-lg">Từ chối</button>
+              {String(l.status || '').toLowerCase() === 'pending' && (
+                <>
+                  <button onClick={() => approveLoan(l.id)} className="flex-1 bg-green-600 text-white py-2 rounded-lg">Phê duyệt</button>
+                  <button onClick={() => updateStatus(l.id, "rejected")} className="flex-1 border py-2 rounded-lg">Từ chối</button>
+                </>
+              )}
+
+              {(String(l.status || '').toLowerCase() === 'approved' || String(l.status || '').toLowerCase() === 'active') && (
+                <button onClick={() => completeLoan(l.id)} className="flex-1 bg-indigo-600 text-white py-2 rounded-lg">Tất toán</button>
+              )}
             </div>
           </div>
         ))}
