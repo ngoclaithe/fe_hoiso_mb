@@ -12,27 +12,36 @@ interface LoansApiResponse { data?: LoanData[] }
 export default function WalletPage() {
   const [latestLoan, setLatestLoan] = useState<LoanData | null>(null);
   const [loading, setLoading] = useState(false);
+  const [balance, setBalance] = useState<number>(0);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-        if (!token) return;
-        setLoading(true);
-        const res = await fetch("/api/my-loans", { cache: "no-store", headers: { Authorization: `Bearer ${token}` } });
-        if (!res.ok) return;
-        const data: LoanData[] | LoansApiResponse = await res.json().catch(() => null);
+  async function loadAll() {
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      if (!token) return;
+      setLoading(true);
+      const [loanRes, balRes] = await Promise.all([
+        fetch("/api/my-loans", { cache: "no-store", headers: { Authorization: `Bearer ${token}` } }),
+        fetch("/api/wallet/balance", { cache: "no-store", headers: { Authorization: `Bearer ${token}` } }),
+      ]);
+
+      if (loanRes.ok) {
+        const data: LoanData[] | LoansApiResponse = await loanRes.json().catch(() => null);
         const arr = Array.isArray(data) ? data : (data?.data || []);
         if (arr && arr.length > 0) setLatestLoan(arr[0]);
-      } catch {
-      } finally {
-        setLoading(false);
       }
-    })();
-  }, []);
+      if (balRes.ok) {
+        const b = await balRes.json().catch(() => null);
+        const val = typeof b === 'number' ? b : (typeof b?.balance === 'number' ? b.balance : 0);
+        setBalance(val || 0);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
 
-  // Mock data
-  const mockBalance = 1250000; // VND
+  useEffect(() => { loadAll(); }, []);
+
+  // Mock data (keep disbursements and banks visual)
   const mockDisbursements = [
     { id: 'd1', date: '2024-05-01', amount: 500000, status: 'Đã giải ngân' },
     { id: 'd2', date: '2024-06-15', amount: 750000, status: 'Đã giải ngân' },
@@ -51,8 +60,54 @@ export default function WalletPage() {
     return '**** ' + a.slice(-4);
   }
 
-  function handleWithdraw() {
-    try { window.alert('Mô phỏng: yêu cầu rút tiền đã được gửi.'); } catch {}
+  async function handleWithdraw() {
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      if (!token) return alert("Bạn cần đăng nhập");
+      const amountStr = prompt("Nhập số tiền muốn rút (VND)", "100000");
+      if (!amountStr) return;
+      const amount = Number(amountStr);
+      if (!Number.isFinite(amount) || amount <= 0) return alert("Số tiền không hợp lệ");
+      const res = await fetch("/api/wallet/withdraw", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ amount }),
+      });
+      if (!res.ok) {
+        const t = await res.text().catch(() => "");
+        throw new Error(t || "Rút tiền thất bại");
+      }
+      await loadAll();
+      alert("Đã gửi yêu cầu rút tiền");
+    } catch (e: unknown) {
+      const m = e instanceof Error ? e.message : "Lỗi";
+      alert(m);
+    }
+  }
+
+  async function handleAddBalance() {
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      if (!token) return alert("Bạn cần đăng nhập");
+      const amountStr = prompt("Nhập số tiền muốn nạp (VND)", "100000");
+      if (!amountStr) return;
+      const amount = Number(amountStr);
+      if (!Number.isFinite(amount) || amount <= 0) return alert("Số tiền không hợp lệ");
+      const res = await fetch("/api/wallet/add-balance", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ amount }),
+      });
+      if (!res.ok) {
+        const t = await res.text().catch(() => "");
+        throw new Error(t || "Nạp tiền thất bại");
+      }
+      await loadAll();
+      alert("Đã nạp tiền vào ví");
+    } catch (e: unknown) {
+      const m = e instanceof Error ? e.message : "Lỗi";
+      alert(m);
+    }
   }
 
   const bankName = latestLoan?.bankName || 'MB Bank';
@@ -100,11 +155,11 @@ export default function WalletPage() {
           <div className="flex items-center justify-between">
             <div>
               <div className="text-sm text-gray-500">Số dư ví</div>
-              <div className="text-2xl font-semibold text-gray-800">{formatVND(mockBalance)}</div>
+              <div className="text-2xl font-semibold text-gray-800">{formatVND(balance)}</div>
             </div>
             <div className="flex flex-col items-end gap-2">
               <button onClick={handleWithdraw} className="bg-blue-600 text-white px-4 py-2 rounded-lg">Rút tiền về tài khoản liên kết</button>
-              <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg">Nạp tiền</button>
+              <button onClick={handleAddBalance} className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg">Nạp tiền</button>
             </div>
           </div>
         </div>
