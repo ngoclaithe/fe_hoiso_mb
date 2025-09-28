@@ -153,8 +153,11 @@ export default function WalletPage() {
               <div className="text-2xl font-semibold text-gray-800">{formatVND(balance)}</div>
             </div>
             <div className="flex flex-col items-end gap-2">
-              <button onClick={handleWithdraw} className="bg-blue-600 text-white px-4 py-2 rounded-lg">Rút tiền về tài khoản liên kết</button>
+              <button onClick={openWithdraw} className="bg-blue-600 text-white px-4 py-2 rounded-lg">Rút tiền về tài khoản liên kết</button>
             </div>
+            {typeof window !== 'undefined' && (
+              <AmountModal open={showWithdrawModal} onClose={() => setShowWithdrawModal(false)} onConfirm={handleWithdrawConfirm} />
+            )}
           </div>
         </div>
 
