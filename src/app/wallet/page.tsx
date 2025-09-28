@@ -166,7 +166,7 @@ export default function WalletPage() {
         <div className="p-4 bg-white rounded-lg shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-sm text-gray-500">Số dư v��</div>
+              <div className="text-sm text-gray-500">Số dư ví</div>
               <div className="text-2xl font-semibold text-gray-800">{formatVND(balance)}</div>
             </div>
             <div className="flex flex-col items-end gap-2">
