@@ -105,6 +105,7 @@ export default function ApplyPage() {
   }, []);
 
   function onSignaturePointerDown(e: React.PointerEvent<HTMLCanvasElement>) {
+    e.preventDefault();
     const ctx = getCanvasCtx();
     if (!ctx) return;
     setSigning(true);
@@ -112,9 +113,11 @@ export default function ApplyPage() {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    ctx.lineWidth = 2;
+    const pressure = e.pressure && e.pressure > 0 ? e.pressure : 0.5;
+    ctx.lineWidth = Math.max(2, pressure * 3);
     ctx.lineCap = "round";
-    ctx.strokeStyle = "#111827"; // gray-900
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = "#111827";
     ctx.beginPath();
     ctx.moveTo(x, y);
     try { e.currentTarget.setPointerCapture(e.pointerId); } catch {}
@@ -122,16 +125,20 @@ export default function ApplyPage() {
 
   function onSignaturePointerMove(e: React.PointerEvent<HTMLCanvasElement>) {
     if (!signing) return;
+    e.preventDefault();
     const ctx = getCanvasCtx();
     if (!ctx) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
+    const pressure = e.pressure && e.pressure > 0 ? e.pressure : 0.5;
+    ctx.lineWidth = Math.max(2, pressure * 3);
     ctx.lineTo(x, y);
     ctx.stroke();
   }
 
   function onSignaturePointerUp(e: React.PointerEvent<HTMLCanvasElement>) {
+    e.preventDefault();
     setSigning(false);
     try { e.currentTarget.releasePointerCapture(e.pointerId); } catch {}
   }
@@ -184,6 +191,14 @@ export default function ApplyPage() {
 
   function set<K extends keyof LoanForm>(key: K, value: LoanForm[K]) {
     setF((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function normalizePhoneInput(v: string): string {
+    const digits = (v || "").replace(/\D/g, "");
+    if (!digits) return "";
+    let s = digits;
+    if (s[0] !== "0") s = "0" + s.slice(0, 9);
+    return s.slice(0, 10);
   }
 
   function getResourceType(file: File, override?: string): string {
@@ -520,7 +535,7 @@ export default function ApplyPage() {
             <input className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={f.loanPurpose} onChange={(e)=>set("loanPurpose", e.target.value)} />
           </label>
           <label className="block text-sm">Số điện thoại người thân 1
-            <input className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={f.contact1Phone} onChange={(e)=>set("contact1Phone", e.target.value)} />
+            <input type="tel" inputMode="numeric" pattern="^0\\d{9}$" maxLength={10} title="Số điện thoại phải gồm 10 chữ số và bắt đầu bằng 0" className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={f.contact1Phone} onChange={(e)=>set("contact1Phone", normalizePhoneInput(e.target.value))} />
           </label>
           <label className="block text-sm">Quan hệ với người thân 1
             <select className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={f.contact1Relationship} onChange={(e)=>set("contact1Relationship", e.target.value)}>
@@ -530,7 +545,7 @@ export default function ApplyPage() {
             </select>
           </label>
           <label className="block text-sm">Số điện thoại người thân 2
-            <input className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={f.contact2Phone} onChange={(e)=>set("contact2Phone", e.target.value)} />
+            <input type="tel" inputMode="numeric" pattern="^0\\d{9}$" maxLength={10} title="Số điện thoại phải gồm 10 chữ số và bắt đầu bằng 0" className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={f.contact2Phone} onChange={(e)=>set("contact2Phone", normalizePhoneInput(e.target.value))} />
           </label>
           <label className="block text-sm">Quan hệ với người thân 2
             <select className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={f.contact2Relationship} onChange={(e)=>set("contact2Relationship", e.target.value)}>
@@ -575,7 +590,7 @@ export default function ApplyPage() {
             <div className="rounded-lg border bg-gray-50">
               <canvas
                 ref={signatureCanvasRef}
-                className="w-full h-40 rounded-lg"
+                className="w-full h-40 rounded-lg touch-none select-none"
                 onPointerDown={onSignaturePointerDown}
                 onPointerMove={onSignaturePointerMove}
                 onPointerUp={onSignaturePointerUp}
