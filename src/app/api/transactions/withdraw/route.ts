@@ -9,12 +9,6 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
   if (!body || typeof body !== "object") return new Response(JSON.stringify({ message: "Missing body" }), { status: 400 });
 
-  // If backend expects userId in URL, forward to /transactions/withdraw/:userId when provided
-  const userId = (body as any).userId || (body as any).id;
-  if (userId) {
-    return forwardRaw(req, `/transactions/withdraw/${encodeURIComponent(String(userId))}`, { method: "POST", includeBody: true, bodyText: JSON.stringify(body), headers });
-  }
-
-  // Otherwise forward to /transactions/withdraw (body-based)
+  // Backend updated: accept body-only withdraw (amount, description). Forward as-is to /transactions/withdraw
   return forwardRaw(req, "/transactions/withdraw", { method: "POST", includeBody: true, bodyText: JSON.stringify(body), headers });
 }
