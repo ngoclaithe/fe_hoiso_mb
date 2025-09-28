@@ -35,5 +35,5 @@ export async function PATCH(req: NextRequest) {
   if (!targetId) return new Response(JSON.stringify({ message: "Missing id" }), { status: 400 });
 
   const headers = buildHeaders(req, req.headers.get("content-type") || "application/json");
-  return forwardRaw(req, `/loans/${targetId}`, { method: "PATCH", includeBody: true, headers });
+  return forwardRaw(req, `/loans/${targetId}`, { method: "PATCH", includeBody: true, bodyText: text, headers });
 }
