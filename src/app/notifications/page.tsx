@@ -25,7 +25,7 @@ export default function NotificationsPage() {
     return { id, text, read, time };
   }
 
-  async function load() {
+  const load = React.useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -41,9 +41,9 @@ export default function NotificationsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [load]);
 
   async function markAllRead() {
     try {
