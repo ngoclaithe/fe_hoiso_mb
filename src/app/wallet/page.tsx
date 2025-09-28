@@ -150,7 +150,6 @@ export default function WalletPage() {
             </div>
             <div className="flex flex-col items-end gap-2">
               <button onClick={handleWithdraw} className="bg-blue-600 text-white px-4 py-2 rounded-lg">Rút tiền về tài khoản liên kết</button>
-              <button onClick={handleAddBalance} className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg">Nạp tiền</button>
             </div>
           </div>
         </div>
