@@ -13,6 +13,12 @@ interface LoanHistory {
   loan_term_months?: number;
   createdAt?: string;
   created_at?: string;
+  // optional extended fields for contract prefilling
+  borrowerName?: string;
+  name?: string;
+  cccd?: string;
+  contractCode?: string;
+  interest?: string;
 }
 
 // Define interface for API response
@@ -136,7 +142,7 @@ export default function HistoryPage() {
             </div>
 
             <div className="mb-4">
-              <div className="mb-2 text-sm text-gray-600">Bên cho vay (Bên A) và chữ ký bên A mặc định</div>
+              <div className="mb-2 text-sm text-gray-600">Bên cho vay (Bên A) và chữ k�� bên A mặc định</div>
               <div className="p-3 border rounded-lg bg-gray-50">
                 <div className="font-medium">Bên cho vay (Bên A): Ngân hàng MB Quân đội</div>
                 <div className="mt-2">Chữ ký bên A: <span className="font-semibold">Ngân hàng MB Quân đội</span></div>
@@ -186,11 +192,11 @@ export default function HistoryPage() {
                 <p><strong>Số CCCD:</strong> {contractData.borrowerCCCD}</p>
                 <p><strong>Ngày ký:</strong> {contractData.signedAt.replace('T',' – ')}</p>
                 <p><strong>Số tiền vay:</strong> {contractData.amount}</p>
-                <p><strong>Mã h���p đồng:</strong> {contractData.code}</p>
+                <p><strong>Mã hợp đồng:</strong> {contractData.code}</p>
                 <p><strong>Thời hạn vay:</strong> {contractData.term}</p>
                 <p><strong>Lãi suất:</strong> {contractData.interest}</p>
 
-                <p>Hợp đồng nêu rõ các bên đã đặt được thỏa thuận vay sau khi thương lượng và trên cơ sở bình đẳng, tự nguyện và nhất trí. Tất cả các bên cần đọc kỹ tất cả các điều khoản trong thỏa thuận này, sau khi ký vào thỏa thuận này coi như các bên đã hiểu đầy đủ và đồng ý hoàn toàn với tất cả các điều khoản và nội dung trong thỏa thuận này.</p>
+                <p>Hợp đồng nêu rõ các bên đã đặt được thỏa thuận vay sau khi thương lượng và trên cơ sở bình đẳng, t�� nguyện và nhất trí. Tất cả các bên cần đọc kỹ tất cả các điều khoản trong thỏa thuận này, sau khi ký vào thỏa thuận này coi như các bên đã hiểu đầy đủ và đồng ý hoàn toàn với tất cả các điều khoản và nội dung trong thỏa thuận này.</p>
 
                 <p><strong>Mục đích vay:</strong> Bên B sử dụng vốn đúng mục đích hợp pháp, không vi phạm pháp luật.</p>
 
