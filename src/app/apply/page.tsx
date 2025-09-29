@@ -182,6 +182,9 @@ export default function ApplyPage() {
     accountHolderName: "",
   });
 
+  const [loanAmountInput, setLoanAmountInput] = useState<string>(String(20_000_000));
+  useEffect(() => { setLoanAmountInput(String(f.loanAmount || "")); }, [f.loanAmount]);
+
   const firstInstallment = useMemo(() => (
     Math.round(calcMonthlyInstallment(f.loanAmount, f.loanTermMonths, f.interestRate))
   ), [f.loanAmount, f.loanTermMonths, f.interestRate]);
@@ -357,9 +360,25 @@ export default function ApplyPage() {
           <h2 className="text-lg font-semibold">Thông tin khoản vay</h2>
           <label className="block text-sm">
             Số tiền vay (20.000.000 - 500.000.000)
-            <input type="number" min={20000000} max={500000000} value={f.loanAmount}
-              onChange={(e)=>set("loanAmount", Math.min(500000000, Math.max(20000000, Number(e.target.value||0))))}
-              className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="\\d*"
+              value={loanAmountInput}
+              onChange={(e) => {
+                const digits = e.target.value.replace(/\D/g, "");
+                setLoanAmountInput(digits);
+                const num = digits ? Number(digits) : 0;
+                set("loanAmount", num);
+              }}
+              onBlur={() => {
+                const num = f.loanAmount || 0;
+                const clamped = Math.min(500000000, Math.max(20000000, num || 0));
+                set("loanAmount", clamped);
+                setLoanAmountInput(String(clamped));
+              }}
+              className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
           </label>
           <label className="block text-sm">
             Thời hạn vay
